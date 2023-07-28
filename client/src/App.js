@@ -7,7 +7,7 @@ import Register from './pages/Register';
 function App() {
   return (
     <>
-      <div className="bg-dark">
+      <div /*className="bg-dark"/>*/>
 
         <BrowserRouter>
           <Routes>
