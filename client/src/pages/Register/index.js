@@ -3,14 +3,20 @@ import React from 'react';
 import { Form, Input, message } from 'antd';
 import "./styles.css"
 import axios from "axios";
+import { useDispatch } from "react-redux"
+import { showLoading, hideLoading } from "../../redux/features/alterSlice";
+
 const Register = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     //form submit handler
     const onFinishHandler = async (values) => {
 
         console.log(values);
         try {
+            dispatch(showLoading());
             const response = await axios.post('/api/v1/user/register', values);
+            dispatch(hideLoading());
             if (response.data.success) {
                 message.success("User registered successfully");
                 navigate('/login');
@@ -21,6 +27,7 @@ const Register = () => {
 
 
         } catch (error) {
+            dispatch(hideLoading());
             console.log(error);
             message.error("something went wrong");
         }
@@ -48,4 +55,3 @@ const Register = () => {
 }
 
 export default Register;
-
