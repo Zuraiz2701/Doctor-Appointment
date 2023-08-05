@@ -1,12 +1,29 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import React from 'react';
-import { Form, Input } from 'antd';
+import { Form, Input, message } from 'antd';
 import "./styles.css"
+import axios from "axios";
 const Register = () => {
-
+    const navigate = useNavigate();
     //form submit handler
-    const onFinishHandler = (values) => {
+    const onFinishHandler = async (values) => {
+
         console.log(values);
+        try {
+            const response = await axios.post('/api/v1/user/register', values);
+            if (response.data.success) {
+                message.success("User registered successfully");
+                navigate('/login');
+            }
+            else {
+                message.error(response.data.message);
+            }
+
+
+        } catch (error) {
+            console.log(error);
+            message.error("something went wrong");
+        }
     }
     return (
 
