@@ -3,15 +3,19 @@ import React from 'react';
 import { Form, Input, message } from 'antd';
 import "./styles.css"
 import axios from 'axios';
+import { useDispatch } from "react-redux"
+import { showLoading, hideLoading } from "../../redux/features/alterSlice";
 
 const Login = () => {
     const navigate = useNavigate();
-
+    const dispatch = useDispatch();
     //form submit handler
     const onFinishHandler = async (values) => {
         //console.log(values);
         try {
+            dispatch(showLoading());
             const response = await axios.post('/api/v1/user/login', values);
+            dispatch(hideLoading());
             console.log(response);
             if (response.data.success) {
                 localStorage.setItem('token', response.data.token);
@@ -23,6 +27,7 @@ const Login = () => {
             }
         }
         catch (error) {
+            dispatch(hideLoading());
             console.log(error);
             message.error("Something went wrong");
         }
