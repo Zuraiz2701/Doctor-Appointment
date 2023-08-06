@@ -4,7 +4,7 @@ import { adminMenu, userMenu } from '../Data';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { message } from 'antd'
-import { useEffect } from 'react';
+//import { useEffect } from 'react';
 
 const Layout = ({ children }) => {
     const { user } = useSelector((state) => state.user);
@@ -20,9 +20,9 @@ const Layout = ({ children }) => {
         navigate('/login');
     }
 
-    useEffect(() => {
-
-    }, [user]);
+    // useEffect(() => {
+    //
+    // }, [user]);
 
     return (
         <>
@@ -40,14 +40,14 @@ const Layout = ({ children }) => {
                                     <>
                                         <div className={`menu-item ${isActive && "active"}`}>
                                             <i className={menu.icon}></i>
-                                            <Link href={menu.path}>{menu.name}</Link>
+                                            <Link to={menu.path}>{menu.name}</Link>
                                         </div>
                                     </>
                                 )
                             })
                             }
                             <div className={`menu-item`} onClick={handleLogout}>
-                                <Link href="/login">
+                                <Link to="/login">
                                     <i className=" fa-solid fa-right-from-bracket"></i>
                                     Logout
                                 </Link>
