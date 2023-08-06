@@ -33,7 +33,7 @@ const loginController = async (req, res) => {
         if (!isMatch) {
             return res.status(200).send({ success: false, message: 'Invalid credentials' });
         }
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '6s' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.status(200).send({ success: true, message: 'User logged in successfully', token });
     } catch (error) {
         console.log(error);
