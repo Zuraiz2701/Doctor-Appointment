@@ -5,13 +5,14 @@ import "./styles.css"
 import axios from 'axios';
 import { useDispatch } from "react-redux"
 import { showLoading, hideLoading } from "../../redux/features/alterSlice";
+import { setUser } from "../../redux/features/userSlice";
 
 const Login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     //form submit handler
     const onFinishHandler = async (values) => {
-        //console.log(values);
+
         try {
             dispatch(showLoading());
             const response = await axios.post('/api/v1/user/login', values);
@@ -20,6 +21,8 @@ const Login = () => {
             if (response.data.success) {
                 localStorage.setItem('token', response.data.token);
                 message.success(response.data.message);
+                //to update data on layout page
+                dispatch(setUser(response.data.data));
                 navigate('/');
             }
             else {

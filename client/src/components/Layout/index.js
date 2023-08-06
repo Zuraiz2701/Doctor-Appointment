@@ -1,12 +1,29 @@
 import React from 'react';
 import './styles.css';
-import { SidebarMenu } from '../SidebarMenu';
-import { Link, useLocation } from 'react-router-dom';
+import { adminMenu, userMenu } from '../Data';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { message } from 'antd'
+import { useEffect } from 'react';
 
 const Layout = ({ children }) => {
-    const { user } = useSelector(state => state.user)
+    const { user } = useSelector((state) => state.user);
     const location = useLocation();
+    const navigate = useNavigate();
+
+    // rendering menu list
+    const sidebarMenu = user?.isAdmin ? adminMenu : userMenu;
+
+    const handleLogout = () => {
+        localStorage.clear();
+        message.success('Logged out successfully');
+        navigate('/login');
+    }
+
+    useEffect(() => {
+
+    }, [user]);
+
     return (
         <>
             <div className='main'>
@@ -17,7 +34,7 @@ const Layout = ({ children }) => {
                             <hr />
                         </div>
                         <div className='menu'>
-                            {SidebarMenu.map((menu) => {
+                            {sidebarMenu.map((menu) => {
                                 const isActive = location.pathname === menu.path;
                                 return (
                                     <>
@@ -25,11 +42,16 @@ const Layout = ({ children }) => {
                                             <i className={menu.icon}></i>
                                             <Link href={menu.path}>{menu.name}</Link>
                                         </div>
-
                                     </>
                                 )
                             })
                             }
+                            <div className={`menu-item`} onClick={handleLogout}>
+                                <Link href="/login">
+                                    <i className=" fa-solid fa-right-from-bracket"></i>
+                                    Logout
+                                </Link>
+                            </div>
                         </div>
                     </div>
                     <div className='content'>
