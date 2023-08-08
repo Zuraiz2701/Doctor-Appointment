@@ -39,9 +39,16 @@ const doctorSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Please enter your fee per minute'],
     },
+    status: {
+        type: String,
+        default: 'pending',
+    },
     timings: {
         type: Object,
         required: [true, 'Please enter your available time slots'],
     },
 
 }, { timestamps: true });
+
+const doctorModel = mongoose.model('doctors', doctorSchema);
+module.exports = doctorModel;
