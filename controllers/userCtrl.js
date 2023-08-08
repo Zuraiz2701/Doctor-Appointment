@@ -111,6 +111,17 @@ const applyDoctorController = async (req, res) => {
 }
 
 // notification controller
-const getAllNotificationController = async (req, res) => { }
+const getAllNotificationController = async (req, res) => {
+    try {
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            message: "Error while getting notification",
+            success: false,
+            error,
+        })
+    }
+}
 
 module.exports = { loginController, registerController, authController, applyDoctorController, getAllNotificationController };
