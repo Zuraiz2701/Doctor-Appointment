@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
         type: Array,
         default: [],
     },
-    ScreenOrientation: {
+    seennotification: {
         type: Array,
         default: [],
     }
