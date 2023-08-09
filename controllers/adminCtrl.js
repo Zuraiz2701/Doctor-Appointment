@@ -49,7 +49,7 @@ const changeAccountStatusController = async (req, res) => {
             message: `your account status has been changed to ${status}`,
             onClickPath: '/notification'
         });
-        user.isDoctor === "approved" ? true : false;
+        user.isDoctor = status === "approved" ? true : false;
         await user.save();
         res.status(200).send({
             success: true,
