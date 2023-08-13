@@ -1,4 +1,5 @@
 const doctorModel = require('../models/doctorModel');
+const appointmentModel = require('../models/appointmentModel');
 const getDoctorInfoController = async (req, res) => {
     try {
         const doctor = await doctorModel.findOne({ userId: req.body.userId });
@@ -56,4 +57,24 @@ const getDoctorByIdController = async (req, res) => {
         })
     }
 }
-module.exports = { getDoctorInfoController, updateProfileController, getDoctorByIdController }
+
+const doctorAppointmentsController = async (req, res) => {
+    try {
+        const doctor = await doctorModel.findOne({ _id: req.body.userId });
+        const appointments = await appointmentModel.find({ doctorId: req.body.doctorId });
+        return res.status(200).send({
+            success: true,
+            message: 'Doctor Appointments fetched successfully',
+            data: appointments,
+        })
+    } catch (error) {
+        console
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: 'Error in Doctor Appointments',
+            error,
+        })
+    }
+}
+module.exports = { getDoctorInfoController, updateProfileController, getDoctorByIdController, doctorAppointmentsController }
