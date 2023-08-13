@@ -38,4 +38,22 @@ const updateProfileController = async (req, res) => {
         );
     }
 }
-module.exports = { getDoctorInfoController, updateProfileController }
+
+const getDoctorByIdController = async (req, res) => {
+    try {
+        const doctor = await doctorModel.findOne({ _id: req.body.doctorId });
+        return res.status(200).send({
+            success: true,
+            message: 'Single Doctor Info',
+            data: doctor,
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: 'Error in Single Doctor Info',
+            error,
+        })
+    }
+}
+module.exports = { getDoctorInfoController, updateProfileController, getDoctorByIdController }
