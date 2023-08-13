@@ -12,7 +12,7 @@ module.exports = async (req, res, next) => {
                 req.body.userId = decoded.id;
                 next()
                 //  console.log(token);
-                console.log("Auth success");
+                //console.log("Auth success");
             }
         });
     }
