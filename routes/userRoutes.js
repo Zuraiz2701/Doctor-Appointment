@@ -36,4 +36,5 @@ router.post('/booking-availability', authMiddleware, bookingAvailabilityControll
 
 //APPOIMENTS LIST
 router.get('/user-appointments', authMiddleware, UserAppointmentController);
+
 module.exports = router;
