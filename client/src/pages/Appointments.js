@@ -1,72 +1,76 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import Layout from "../components/Layout";
+import { showLoading, hideLoading } from "../redux/alertsSlice";
+import { toast } from "react-hot-toast";
 import axios from "axios";
-import Layout from "./../components/Layout";
-import moment from "moment";
 import { Table } from "antd";
+import moment from "moment";
 
-const Appointments = () => {
+function Appointments() {
   const [appointments, setAppointments] = useState([]);
-
-  const getAppointments = async () => {
+  const dispatch = useDispatch();
+  const getAppointmentsData = async () => {
     try {
-      const res = await axios.get("/api/v1/user/user-appointments", {
+      dispatch(showLoading());
+      const resposne = await axios.get("/api/user/get-appointments-by-user-id", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      if (res.data.success) {
-        setAppointments(res.data.data);
+      dispatch(hideLoading());
+      if (resposne.data.success) {
+        setAppointments(resposne.data.data);
       }
     } catch (error) {
-      console.log(error);
+      dispatch(hideLoading());
     }
   };
-
-  useEffect(() => {
-    getAppointments();
-  }, []);
-
   const columns = [
     {
-      title: "ID",
-      dataIndex: "_id",
+        title: "Id",
+        dataIndex: "_id",
     },
-    // {
-    //   title: "Name",
-    //   dataIndex: "name",
-    //   render: (text, record) => (
-    //     <span>
-    //       {record.doctorInfo.firstName} {record.doctorInfo.lastName}
-    //     </span>
-    //   ),
-    // },
-    // {
-    //   title: "Phone",
-    //   dataIndex: "phone",
-    //   render: (text, record) => <span>{record.doctorInfo.phone}</span>,
-    // },
     {
-      title: "Date & Time",
-      dataIndex: "date",
+      title: "Doctor",
+      dataIndex: "name",
       render: (text, record) => (
         <span>
-          {moment(record.date).format("DD-MM-YYYY")} &nbsp;
-          {moment(record.time).format("HH:mm")}
+          {record.doctorInfo.firstName} {record.doctorInfo.lastName}
         </span>
       ),
     },
     {
-      title: "Status",
-      dataIndex: "status",
+      title: "Phone",
+      dataIndex: "phoneNumber",
+      render: (text, record) => (
+        <span>
+          {record.doctorInfo.phoneNumber} 
+        </span>
+      ),
     },
+    {
+      title: "Date & Time",
+      dataIndex: "createdAt",
+      render: (text, record) => (
+        <span>
+          {moment(record.date).format("DD-MM-YYYY")} {moment(record.time).format("HH:mm")}
+        </span>
+      ),
+    },
+    {
+        title: "Status",
+        dataIndex: "status",
+    }
   ];
-
-  return (
-    <Layout>
-      <h1>Appoinmtnets Lists</h1>
-      <Table columns={columns} dataSource={appointments} />
-    </Layout>
-  );
-};
+  useEffect(() => {
+    getAppointmentsData();
+  }, []);
+  return  <Layout>
+  <h1 className="page-title">Appointments</h1>
+  <hr />
+  <Table columns={columns} dataSource={appointments} />
+</Layout>
+}
 
 export default Appointments;

@@ -1,58 +1,57 @@
+import { Button, Form, Input } from "antd";
 import React from "react";
-import "../styles/RegiserStyles.css";
-import { Form, Input, message } from "antd";
-import { useDispatch } from "react-redux";
-import { showLoading, hideLoading } from "../redux/features/alertSlice";
+import toast from "react-hot-toast";
+import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { hideLoading, showLoading } from "../redux/alertsSlice";
 
-const Login = () => {
-  const navigate = useNavigate();
+function Login() {
   const dispatch = useDispatch();
-  //form handler
-  const onfinishHandler = async (values) => {
+  const navigate = useNavigate();
+  const onFinish = async (values) => {
     try {
       dispatch(showLoading());
-      const res = await axios.post("/api/v1/user/login", values);
-      window.location.reload();
+      const response = await axios.post("/api/user/login", values);
       dispatch(hideLoading());
-      if (res.data.success) {
-        localStorage.setItem("token", res.data.token);
-        message.success("Login Successfully");
+      if (response.data.success) {
+        toast.success(response.data.message);
+        localStorage.setItem("token", response.data.data);
         navigate("/");
       } else {
-        message.error(res.data.message);
+        toast.error(response.data.message);
       }
     } catch (error) {
       dispatch(hideLoading());
-      console.log(error);
-      message.error("something went wrong");
+      toast.error("Something went wrong");
     }
   };
-  return (
-    <div className="form-container ">
-      <Form
-        layout="vertical"
-        onFinish={onfinishHandler}
-        className="register-form"
-      >
-        <h3 className="text-center">Login From</h3>
 
-        <Form.Item label="Email" name="email">
-          <Input type="email" required />
-        </Form.Item>
-        <Form.Item label="Password" name="password">
-          <Input type="password" required />
-        </Form.Item>
-        <Link to="/register" className="m-2">
-          Not a user Register here
-        </Link>
-        <button className="btn btn-primary" type="submit">
-          Login
-        </button>
-      </Form>
+  return (
+    <div className="authentication">
+      <div className="authentication-form card p-3">
+        <h1 className="card-title">Welcome Back</h1>
+        <Form layout="vertical" onFinish={onFinish}>
+          <Form.Item label="Email" name="email">
+            <Input placeholder="Email" />
+          </Form.Item>
+          <Form.Item label="Password" name="password">
+            <Input placeholder="Password" type="password" />
+          </Form.Item>
+
+          
+          <Button className="primary-button my-2 full-width-button" htmlType="submit">
+            LOGIN
+          </Button>
+
+          <Link to="/register" className="anchor mt-2">
+            CLICK HERE TO REGISTER
+          </Link>
+         
+        </Form>
+      </div>
     </div>
   );
-};
+}
 
 export default Login;
