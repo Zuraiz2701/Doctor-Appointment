@@ -1,21 +1,20 @@
-import React, { useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import React from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { useSelector, useDispatch } from "react-redux";
-import { hideLoading, showLoading } from "../redux/features/alertSlice";
-import { setUser } from "../redux/features/userSlice";
+import { setUser } from "../redux/userSlice";
+import { showLoading, hideLoading } from "../redux/alertsSlice";
 
-export default function ProtectedRoute({ children }) {
-  const dispatch = useDispatch();
+function ProtectedRoute(props) {
   const { user } = useSelector((state) => state.user);
-
-  //get user
-  //eslint-disable-next-line
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const getUser = async () => {
     try {
-      dispatch(showLoading());
-      const res = await axios.post(
-        "/api/v1/user/getUserData",
+      dispatch(showLoading())
+      const response = await axios.post(
+        "/api/user/get-user-info-by-id",
         { token: localStorage.getItem("token") },
         {
           headers: {
@@ -24,16 +23,16 @@ export default function ProtectedRoute({ children }) {
         }
       );
       dispatch(hideLoading());
-      if (res.data.success) {
-        dispatch(setUser(res.data.data));
+      if (response.data.success) {
+        dispatch(setUser(response.data.data));
       } else {
-        localStorage.clear();
-        <Navigate to="/login" />;
+        localStorage.clear()
+        navigate("/login");
       }
     } catch (error) {
-      localStorage.clear();
       dispatch(hideLoading());
-      console.log(error);
+      localStorage.clear()
+      navigate("/login");
     }
   };
 
@@ -41,11 +40,13 @@ export default function ProtectedRoute({ children }) {
     if (!user) {
       getUser();
     }
-  }, [user, getUser]);
+  }, [user]);
 
   if (localStorage.getItem("token")) {
-    return children;
+    return props.children;
   } else {
     return <Navigate to="/login" />;
   }
 }
+
+export default ProtectedRoute;
