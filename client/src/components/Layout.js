@@ -71,12 +71,14 @@ function Layout({ children }) {
 
   const menuToBeRendered = user?.isAdmin ? adminMenu : user?.isDoctor ? doctorMenu : userMenu;
   const role = user?.isAdmin ? "Admin" : user?.isDoctor ? "Doctor" : "User";
+
   return (
     <div className="main">
       <div className="d-flex layout">
         <div className="sidebar">
           <div className="sidebar-header">
-            <h1 className="logo">SH</h1>
+            <h3 className="logo">E-Med</h3>
+            <br />
             <h1 className="role">{role}</h1>
           </div>
 
@@ -85,9 +87,8 @@ function Layout({ children }) {
               const isActive = location.pathname === menu.path;
               return (
                 <div
-                  className={`d-flex menu-item ${
-                    isActive && "active-menu-item"
-                  }`}
+                  className={`d-flex menu-item ${isActive && "active-menu-item"
+                    }`}
                 >
                   <i className={menu.icon}></i>
                   {!collapsed && <Link to={menu.path}>{menu.name}</Link>}
