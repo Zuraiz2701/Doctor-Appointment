@@ -213,27 +213,65 @@ router.post("/book-appointment", authMiddleware, async (req, res) => {
 
 router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
   try {
+
+
     const date = moment(req.body.date, "DD-MM-YYYY").toISOString();
+    const selectedDate = moment(req.body.date, "DD-MM-YYYY");
+    const selectedTime = moment(req.body.time, "HH:mm");
     const fromTime = moment(req.body.time, "HH:mm")
       .subtract(1, "hours")
       .toISOString();
     const toTime = moment(req.body.time, "HH:mm").add(1, "hours").toISOString();
     const doctorId = req.body.doctorId;
-    const appointments = await Appointment.find({
+    const timeSlot1 = moment(req.body.timeSlot1, "HH:mm");
+    const timeSlot2 = moment(req.body.timeSlot2, "HH:mm");
+
+
+    console.log('time:', selectedTime);
+    console.log('fromTime:', fromTime);
+    console.log('date:', date);
+    console.log("timings:", timeSlot1, " - ", timeSlot2);
+
+
+    // Check if the selected date is in the past
+    if (selectedDate.isBefore(moment(), "day")) {
+      return res.status(200).send({
+        message: "Selected date is in the past",
+        success: false,
+      });
+    }
+
+    // Check if the selected time is within the specified time slot
+    console.log("isWithinTimeSlot:", selectedTime.isBetween(timeSlot1, timeSlot2, null, "[]"));
+    if (!selectedTime.isBetween(timeSlot1, timeSlot2, null, "[]")) {
+      return res.status(200).send({
+        message: "Selected time is not within the specified time slot",
+        success: false,
+      });
+    }
+
+
+    const overlappingAppointments = await Appointment.find({
       doctorId,
       date,
       time: { $gte: fromTime, $lte: toTime },
+      //sstatus: 'approved'
     });
-    if (appointments.length > 0) {
+
+
+
+    if (overlappingAppointments.length > 0) {
       return res.status(200).send({
         message: "Appointments not available",
         success: false,
       });
-    } else {
+    }
+    else {
       return res.status(200).send({
         message: "Appointments available",
         success: true,
       });
+
     }
   } catch (error) {
     console.log(error);
@@ -253,6 +291,7 @@ router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {
       success: true,
       data: appointments,
     });
+    console.log('appointment', appointments);
   } catch (error) {
     console.log(error);
     res.status(500).send({

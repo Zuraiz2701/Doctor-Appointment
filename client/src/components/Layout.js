@@ -3,10 +3,12 @@ import "../layout.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Badge } from "antd";
+import { useEffect } from "react";
 
 function Layout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const { user } = useSelector((state) => state.user);
+  const [refresh, setRefresh] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,7 +74,17 @@ function Layout({ children }) {
   const menuToBeRendered = user?.isAdmin ? adminMenu : user?.isDoctor ? doctorMenu : userMenu;
   const role = user?.isAdmin ? "Admin" : user?.isDoctor ? "Doctor" : "User";
 
+  useEffect(() => {
+    // Use the 'refresh' state to trigger a component refresh
+    if (refresh) {
+      setRefresh(false); // Reset the state to prevent continuous refresh
+    }
+  }, [refresh]);
+
+
+
   return (
+
     <div className="main">
       <div className="d-flex layout">
         <div className="sidebar">
@@ -99,6 +111,8 @@ function Layout({ children }) {
               className={`d-flex menu-item `}
               onClick={() => {
                 localStorage.clear();
+                //setRefresh(true);
+                window.location.reload();
                 navigate("/login");
               }}
             >

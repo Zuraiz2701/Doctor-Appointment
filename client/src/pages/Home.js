@@ -29,9 +29,8 @@ function Home() {
         console.log(error);
       }
     };
-
     getData();
-  }, []);
+  }, [dispatch]);
 
   return (
     <Layout>

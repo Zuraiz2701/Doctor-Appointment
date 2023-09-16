@@ -52,6 +52,8 @@ function BookAppointment() {
           doctorId: params.doctorId,
           date: date,
           time: time,
+          timeSlot1: doctor.timings[0],
+          timeSlot2: doctor.timings[1]
         },
         {
           headers: {
@@ -94,7 +96,7 @@ function BookAppointment() {
 
       dispatch(hideLoading());
       if (response.data.success) {
-        
+
         toast.success(response.data.message);
         navigate('/appointments')
       }
@@ -161,7 +163,7 @@ function BookAppointment() {
                     setTime(moment(value).format("HH:mm"));
                   }}
                 />
-              {!isAvailable &&   <Button
+                {!isAvailable && <Button
                   className="primary-button mt-3 full-width-button"
                   onClick={checkAvailability}
                 >
@@ -178,7 +180,7 @@ function BookAppointment() {
                 )}
               </div>
             </Col>
-           
+
           </Row>
         </div>
       )}
