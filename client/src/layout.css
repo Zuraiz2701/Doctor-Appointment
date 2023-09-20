@@ -1,17 +1,19 @@
-.main{
+.main {
     padding: 20px;
 }
 
-.logo{
+.logo {
     color: white;
     font-weight: bold;
 }
-.role{
+
+.role {
     color: white;
     font-size: 14px;
-    margin-top:-20px ;
+    margin-top: -20px;
 }
-.sidebar{
+
+.sidebar {
     background-color: #005555;
     border-radius: 5px;
     box-shadow: 0 0 2px gray;
@@ -19,11 +21,13 @@
     min-height: 100%;
     padding: 10px;
 }
- .content{
+
+.content {
     width: 100%;
     height: 100%;
- }
-.header{
+}
+
+.header {
     background-color: white;
     border-radius: 5px;
     box-shadow: 0 0 2px gray;
@@ -34,62 +38,65 @@
     justify-content: space-between;
 }
 
-.body{
+.body {
     background-color: white;
     border-radius: 5px;
     box-shadow: 0 0 2px gray;
     height: 82vh;
     width: 100%;
-    padding: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 10px;
     overflow-x: scroll !important;
 }
 
 
-.menu{
+.menu {
     margin-top: 100px;
     padding: 0 10px;
 }
 
-.menu-item{
+.menu-item {
     margin-top: 30px;
 }
 
-.menu-item a{
+.menu-item a {
     color: rgba(255, 255, 255, 0.727);
     text-decoration: none;
     font-size: 18px;
     padding: 0 10px;
 }
-.menu-item i{
+
+.menu-item i {
     color: rgba(255, 255, 255, 0.716);
     text-decoration: none;
     font-size: 18px;
-    margin:0 15px;
+    margin: 0 15px;
 }
 
-.active-menu-item{
+.active-menu-item {
     color: white;
     background-color: #013737;
     padding: 5px;
     border-radius: 5px;
 }
 
-.header-action-icon{
+.header-action-icon {
     font-size: 30px;
     color: black !important;
     cursor: pointer;
     padding-left: 10px;
 }
 
-.ant-scroll-number-only-unit{
-     padding-right: -10px !important;
-     padding-bottom: -10px !important;
+.ant-scroll-number-only-unit {
+    padding-right: -10px !important;
+    padding-bottom: -10px !important;
 }
 
-@media screen and (max-width: 768px){
-  
-    .menu{
+@media screen and (max-width: 768px) {
+
+    .menu {
         padding: 0 5px;
     }
-    
+
 }

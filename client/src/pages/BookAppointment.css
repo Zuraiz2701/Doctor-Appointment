@@ -1,0 +1,27 @@
+/* BookAppointment.css */
+
+.page-title {
+    padding: 15px;
+    margin-top: 15px;
+    font-size: 24px;
+    margin-bottom: 20px;
+    background-color: #005555;
+    color: #fff;
+    border-radius: 5px;
+}
+
+hr {
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+}
+
+.normal-text {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.full-width-button {
+    width: 100%;
+}
+
+/* Add more styles as needed */

@@ -1,0 +1,30 @@
+/* DoctorSearchBar.css */
+
+/* Container style */
+.search-bar-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Input style */
+.search-input {
+    padding: 10px;
+    border: 2px solid #007777;
+    border-radius: 5px;
+    flex-grow: 1;
+}
+
+/* Button style */
+.search-button {
+    background-color: #007777;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.search-button:hover {
+    background-color: #005555;
+}

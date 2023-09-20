@@ -7,7 +7,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 //import DoctorForm from "../components/DoctorForm";
 import moment from "moment";
-import { Button, Col, Form, Input, Row, TimePicker, Select, Image } from "antd";
+import { Button, Col, Form, Input, Row, TimePicker, Select } from "antd";
 
 
 function ApplyDoctor() {

@@ -8,6 +8,7 @@ import axios from "axios";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import DoctorForm from "../components/DoctorForm";
 import moment from "moment";
+import "./BookAppointment.css"; // Import the CSS file
 
 function BookAppointment() {
   const [isAvailable, setIsAvailable] = useState(false);
