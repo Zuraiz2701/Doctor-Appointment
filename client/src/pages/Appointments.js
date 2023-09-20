@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 import { Table } from "antd";
 import moment from "moment";
+import "./Appointments.css";
 
 function Appointments() {
   const [appointments, setAppointments] = useState([]);
@@ -28,8 +29,8 @@ function Appointments() {
   };
   const columns = [
     {
-        title: "Id",
-        dataIndex: "_id",
+      title: "Id",
+      dataIndex: "_id",
     },
     {
       title: "Doctor",
@@ -45,7 +46,7 @@ function Appointments() {
       dataIndex: "phoneNumber",
       render: (text, record) => (
         <span>
-          {record.doctorInfo.phoneNumber} 
+          {record.doctorInfo.phoneNumber}
         </span>
       ),
     },
@@ -59,18 +60,31 @@ function Appointments() {
       ),
     },
     {
-        title: "Status",
-        dataIndex: "status",
+      title: "Status",
+      dataIndex: "status",
     }
   ];
   useEffect(() => {
     getAppointmentsData();
   }, []);
-  return  <Layout>
-  <h1 className="page-title">Appointments</h1>
-  <hr />
-  <Table columns={columns} dataSource={appointments} />
-</Layout>
+  return (
+    <Layout>
+      <h1 className="page-title">Appointments</h1>
+      <hr />
+      <Table
+        columns={columns}
+        dataSource={appointments}
+        style={{
+          border: '1px solid #e8e8e8',
+          borderRadius: '4px',
+          padding: '16px',
+          background: 'linear-gradient(#005555, #007777)',
+          color: '#linear-gradient(#005555, #007777)', // Set text color to white
+        }}
+      />
+
+    </Layout>
+  )
 }
 
 export default Appointments;

@@ -1,0 +1,43 @@
+/* Appointments.css */
+
+.page-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+hr {
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+}
+
+/* Customize the table styles */
+.ant-table {
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+.ant-table-thead th {
+    background-color: #007777;
+    color: #fff;
+}
+
+.ant-table-tbody tr {
+    transition: background-color 0.3s;
+}
+
+.ant-table-tbody tr:hover {
+    background-color: #f2f2f2;
+}
+
+/* Customize column styles */
+.ant-table-cell {
+    padding: 12px 16px;
+}
+
+/* Customize status column styles */
+.ant-table-column-title-status,
+.ant-table-column-title-name {
+    font-weight: bold;
+}
+
+/* Add more styles as needed */

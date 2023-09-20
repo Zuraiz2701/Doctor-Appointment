@@ -35,7 +35,7 @@ function DoctorAppointments() {
       dispatch(showLoading());
       const resposne = await axios.post(
         "/api/doctor/change-appointment-status",
-        { appointmentId : record._id, status: status },
+        { appointmentId: record._id, status: status },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -113,7 +113,17 @@ function DoctorAppointments() {
     <Layout>
       <h1 className="page-header">Appointments</h1>
       <hr />
-      <Table columns={columns} dataSource={appointments} />
+      <Table
+        columns={columns}
+        dataSource={appointments}
+        style={{
+          border: '1px solid #e8e8e8',
+          borderRadius: '4px',
+          padding: '16px',
+          background: 'linear-gradient(#005555, #007777)',
+          color: '#linear-gradient(#005555, #007777)', // Set text color to white
+        }}
+      />
     </Layout>
   );
 }
