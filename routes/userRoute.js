@@ -8,6 +8,14 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const Appointment = require("../models/appointmentModel");
 const moment = require("moment");
 
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+  cloud_name: 'dicrko3r2',
+  api_key: '343791644752978',
+  api_secret: 'Shoyrv1UOoVVVg6kJ5qf50PCi_I'
+});
+//const files = fileUpload;
+
 router.post("/register", async (req, res) => {
   try {
     const userExists = await User.findOne({ email: req.body.email });
@@ -47,9 +55,9 @@ router.post("/login", async (req, res) => {
         .status(200)
         .send({ message: "Password is incorrect", success: false });
     } else {
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "1d",
-      });
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET
+        , { expiresIn: "1d", }
+      );
       res
         .status(200)
         .send({ message: "Login successful", success: true, data: token });
@@ -83,36 +91,57 @@ router.post("/get-user-info-by-id", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/apply-doctor-account", authMiddleware, async (req, res) => {
+router.post("/apply-doctor-account", async (req, res) => {
   try {
-    const newdoctor = new Doctor({ ...req.body, status: "pending" });
-    await newdoctor.save();
-    const adminUser = await User.findOne({ isAdmin: true });
+    console.log('request body:', req.body);
+    const file = req.files.photo;
+    console.log('file is ', file);
 
-    const unseenNotifications = adminUser.unseenNotifications;
-    unseenNotifications.push({
-      type: "new-doctor-request",
-      message: `${newdoctor.firstName} ${newdoctor.lastName} has applied for a doctor account`,
-      data: {
-        doctorId: newdoctor._id,
-        name: newdoctor.firstName + " " + newdoctor.lastName,
-      },
-      onClickPath: "/admin/doctorslist",
-    });
-    await User.findByIdAndUpdate(adminUser._id, { unseenNotifications });
-    res.status(200).send({
-      success: true,
-      message: "Doctor account applied successfully",
+    cloudinary.uploader.upload(file.tempFilePath, async (uploadErr, result) => {
+      if (uploadErr) {
+        console.error('Error uploading file to Cloudinary:', uploadErr);
+        return res.status(500).json({
+          message: "Error uploading photo to Cloudinary",
+          success: false,
+          error: uploadErr,
+        });
+      }
+
+      console.log('result is ', result);
+      console.log('URL is ', result.url);
+
+      const newdoctor = new Doctor({ ...req.body, status: "pending", photo: result.url });
+      await newdoctor.save();
+      const adminUser = await User.findOne({ isAdmin: true });
+
+      const unseenNotifications = adminUser.unseenNotifications;
+      unseenNotifications.push({
+        type: "new-doctor-request",
+        message: `${newdoctor.firstName} ${newdoctor.lastName} has applied for a doctor account`,
+        data: {
+          doctorId: newdoctor._id,
+          name: newdoctor.firstName + " " + newdoctor.lastName,
+        },
+        onClickPath: "/admin/doctorslist",
+      });
+      await User.findByIdAndUpdate(adminUser._id, { unseenNotifications });
+
+      res.status(200).json({
+        success: true,
+        message: "Doctor account applied successfully",
+        photoUrl: result.url, // Optionally send the Cloudinary URL in the response.
+      });
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).send({
+    console.error('Error in applying doctor account:', error);
+    res.status(500).json({
       message: "Error applying doctor account",
       success: false,
       error,
     });
   }
 });
+
 router.post(
   "/mark-all-notifications-as-seen",
   authMiddleware,

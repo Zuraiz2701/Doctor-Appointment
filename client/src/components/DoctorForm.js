@@ -1,141 +1,16 @@
-//import { Button, Col, Form, Input, Row, TimePicker } from "antd";
-//import moment from "moment";
-//import React from "react";
-//
-//function DoctorForm({ onFinish, initivalValues }) {
-//  return (
-//    <Form
-//      layout="vertical"
-//      onFinish={onFinish}
-//      initialValues={{
-//        ...initivalValues,
-//        ...(initivalValues && {
-//          timings: [
-//            moment(initivalValues?.timings[0], "HH:mm"),
-//            moment(initivalValues?.timings[1], "HH:mm"),
-//          ],
-//        }),
-//      }}
-//    >
-//      <h1 className="card-title mt-3">Personal Information</h1>
-//      <Row gutter={20}>
-//        <Col span={8} xs={24} sm={24} lg={8}>
-//          <Form.Item
-//            required
-//            label="First Name"
-//            name="firstName"
-//            rules={[{ required: true }]}
-//          >
-//            <Input placeholder="First Name" />
-//          </Form.Item>
-//        </Col>
-//        <Col span={8} xs={24} sm={24} lg={8}>
-//          <Form.Item
-//            required
-//            label="Last Name"
-//            name="lastName"
-//            rules={[{ required: true }]}
-//          >
-//            <Input placeholder="Last Name" />
-//          </Form.Item>
-//        </Col>
-//        <Col span={8} xs={24} sm={24} lg={8}>
-//          <Form.Item
-//            required
-//            label="Phone Number"
-//            name="phoneNumber"
-//            rules={[{ required: true }]}
-//          >
-//            <Input placeholder="Phone Number" />
-//          </Form.Item>
-//        </Col>
-//        <Col span={8} xs={24} sm={24} lg={8}>
-//          <Form.Item
-//            required
-//            label="Website"
-//            name="website"
-//            rules={[{ required: true }]}
-//          >
-//            <Input placeholder="Website" />
-//          </Form.Item>
-//        </Col>
-//        <Col span={8} xs={24} sm={24} lg={8}>
-//          <Form.Item
-//            required
-//            label="Address"
-//            name="address"
-//            rules={[{ required: true }]}
-//          >
-//            <Input placeholder="Address" />
-//          </Form.Item>
-//        </Col>
-//      </Row>
-//      <hr />
-//      <h1 className="card-title mt-3">Professional Information</h1>
-//      <Row gutter={20}>
-//        <Col span={8} xs={24} sm={24} lg={8}>
-//          <Form.Item
-//            required
-//            label="Specialization"
-//            name="specialization"
-//            rules={[{ required: true }]}
-//          >
-//            <Input placeholder="Specialization" />
-//          </Form.Item>
-//        </Col>
-//        <Col span={8} xs={24} sm={24} lg={8}>
-//          <Form.Item
-//            required
-//            label="Experience"
-//            name="experience"
-//            rules={[{ required: true }]}
-//          >
-//            <Input placeholder="Experience" type="number" />
-//          </Form.Item>
-//        </Col>
-//        <Col span={8} xs={24} sm={24} lg={8}>
-//          <Form.Item
-//            required
-//            label="Fee Per Cunsultation"
-//            name="feePerCunsultation"
-//            rules={[{ required: true }]}
-//          >
-//            <Input placeholder="Fee Per Cunsultation" type="number" />
-//          </Form.Item>
-//        </Col>
-//        <Col span={8} xs={24} sm={24} lg={8}>
-//          <Form.Item
-//            required
-//            label="Timings"
-//            name="timings"
-//            rules={[{ required: true }]}
-//          >
-//            <TimePicker.RangePicker format="HH:mm" />
-//          </Form.Item>
-//        </Col>
-//      </Row>
-//
-//      <div className="d-flex justify-content-end">
-//        <Button className="primary-button" htmlType="submit">
-//          SUBMIT
-//        </Button>
-//      </div>
-//    </Form>
-//  );
-//}
-//
-//export default DoctorForm;
-
-
-import { Button, Col, Form, Input, Row, TimePicker, Select } from "antd";
+import { Button, Col, Form, Input, Row, TimePicker, Select, Image } from "antd";
 import moment from "moment";
-import React from "react";
+
 
 function DoctorForm({ onFinish, initialValues }) {
+
+
+
   return (
     <Form
       layout="vertical"
       onFinish={onFinish}
+      encType="multipart/form-data"
       initialValues={{
         ...initialValues,
         ...(initialValues && {
@@ -148,6 +23,7 @@ function DoctorForm({ onFinish, initialValues }) {
     >
       <h1 className="card-title mt-3">Personal Information</h1>
       <Row gutter={20}>
+
         <Col span={8} xs={24} sm={24} lg={8}>
           <Form.Item
             required
@@ -196,27 +72,21 @@ function DoctorForm({ onFinish, initialValues }) {
             <Input placeholder="Phone Number" />
           </Form.Item>
         </Col>
+
+
         <Col span={8} xs={24} sm={24} lg={8}>
           <Form.Item
             required
-            label="Website"
-            name="website"
-            rules={[{ required: true, message: "Website is required" }]}
+            label='Profile Picture'
+            name='photo'
+            rules={[{ required: true, message: 'Profile Picture is required' }]}
           >
-            <Input placeholder="Website" />
+            <Input type="file" name="photo" placeholder="Profile Picture" />
           </Form.Item>
         </Col>
-        <Col span={8} xs={24} sm={24} lg={8}>
-          <Form.Item
-            required
-            label="Address"
-            name="address"
-            rules={[{ required: true, message: "Address is required" }]}
-          >
-            <Input placeholder="Address" />
-          </Form.Item>
-        </Col>
+
       </Row>
+
       <hr />
       <h1 className="card-title mt-3">Professional Information</h1>
       <Row gutter={20}>
@@ -255,9 +125,9 @@ function DoctorForm({ onFinish, initialValues }) {
               <Select.Option value="Plastic Surgeon">Plastic Surgeon</Select.Option>
               <Select.Option value="Gynecologic Oncologist">Gynecologic Oncologist</Select.Option>
               <Select.Option value="Neonatologist">Neonatologist</Select.Option>
+              <Select.Option value="Neonatologist">Other</Select.Option>
 
 
-              {/* Add more specialization options here */}
             </Select>
           </Form.Item>
 
@@ -276,23 +146,14 @@ function DoctorForm({ onFinish, initialValues }) {
           </Form.Item>
         </Col>
         <Col span={8} xs={24} sm={24} lg={8}>
-          {/*          <Form.Item
-            required
-            label="Fee Per Consultation in PKR"
-            name="feePerConsultation"
-            rules={[
-              { required: true, message: "Fee Per Consultation is required" },
-              { pattern: /^[0-9]+$/, message: "Only numbers are allowed for Fee Per Consultation" },
-            ]}
-          >
-            <Input placeholder="Fee Per Consultation" />
-          </Form.Item>
-*/}
           <Form.Item
             required
             label="Fee Per Cunsultation"
             name="feePerCunsultation"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "Fee Per Consultation is required" },
+              { pattern: /^[0-9]+$/, message: "Only numbers are allowed for Fee Per Consultation" },
+            ]}
           >
             <Input placeholder="Fee Per Cunsultation" type="number" />
           </Form.Item>
@@ -320,3 +181,48 @@ function DoctorForm({ onFinish, initialValues }) {
 }
 
 export default DoctorForm;
+
+/*          <Form.Item
+            required
+            label="Fee Per Consultation in PKR"
+            name="feePerConsultation"
+            rules={[
+              { required: true, message: "Fee Per Consultation is required" },
+              { pattern: /^[0-9]+$/, message: "Only numbers are allowed for Fee Per Consultation" },
+            ]}
+          >
+            <Input placeholder="Fee Per Consultation" />
+          </Form.Item>
+*/
+
+/*<Col span={8} xs={24} sm={24} lg={8}>
+  <Form.Item
+    required
+    label="Profile Picture"
+    name="profilePicture"
+    rules={[{ required: true, message: "Profile Picture is required" }]}
+    valuePropName="fileList"
+  //getValueFromEvent={convertToBase64}
+  >
+    <Input
+      accept="image/*"
+      type="file"
+      placeholder="Profile Picture"
+      onChange={convertToBase64}
+    />
+  </Form.Item>
+  <Form.Item>
+    {/*image === "" ? null : <img src={image} alt="profile" width={100} height={100} />}
+  </Form.Item>
+</Col>
+*/
+
+
+
+
+
+
+
+
+
+

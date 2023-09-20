@@ -136,16 +136,8 @@ function BookAppointment() {
                 {doctor.phoneNumber}
               </p>
               <p>
-                <b>Address : </b>
-                {doctor.address}
-              </p>
-              <p>
-                <b>Fee per Visit : </b>
+                <b>Fee per Appointment : </b>
                 {doctor.feePerCunsultation}
-              </p>
-              <p>
-                <b>Website : </b>
-                {doctor.website}
               </p>
               <div className="d-flex flex-column pt-2 mt-2">
                 <DatePicker

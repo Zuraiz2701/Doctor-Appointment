@@ -17,10 +17,6 @@ function Doctor({ doctor }) {
         {doctor.phoneNumber}
       </p>
       <p>
-        <b>Address : </b>
-        {doctor.address}
-      </p>
-      <p>
         <b>Fee per Visit : </b>
         {doctor.feePerCunsultation}
       </p>
