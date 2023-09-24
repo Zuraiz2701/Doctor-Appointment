@@ -1,253 +1,229 @@
-import { useEffect, useState } from "react";
-import { getMeetingId, getToken } from './MeetingView'
+import React, { useEffect, useRef, useState } from "react";
+import { Row, Col } from 'react-simple-flex-grid';
+import "react-simple-flex-grid/lib/main.css";
+import { MeetingProvider, MeetingConsumer, useMeeting, useParticipant } from "@videosdk.live/react-sdk";
+import { getMeetingId, getToken } from "./MeetingView";
+
+const chunk = (arr) => {
+  const newArr = [];
+  while (arr.length)
+    newArr.push(arr.splice(0, 3));
+  return newArr;
+
+}
+
+function JoinScreen({ updateMeetingId, getMeetingAndToken }) {
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Enter Meeting Id"
+        onChange={(e) => {
+          updateMeetingId(e.target.value);
+        }}
+      />
+      <button onClick={getMeetingAndToken}>Join</button>
+      <button onClick={getMeetingAndToken}>Create Meeting</button>
+    </div>
+  )
+}
+
+function MeetingGrid({ meetingId, getMeetingAndToken }) {
+  const [joined, setJoined] = useState(false);
+  const { join, leave, toggleMic, toggleWebcam, toggleScreenShare } = useMeeting()
+
+  const { participants } = useMeeting()
+  const joinMeeting = () => {
+    setJoined(true);
+    join();
+  }
+  return (
+    <div>
+      <header>Meeting Id: {meetingId}</header>
+      {
+        joined ?
+          (
+            <div>
+              <button onClick={leave}>
+                Leave
+              </button>
+              <button onClick={toggleMic}>
+                Mic
+              </button>
+              <button onClick={toggleWebcam}>
+                Webcam
+              </button>
+              <button onClick={toggleScreenShare}>
+                Toggle Screen Share
+              </button>
+            </div>
+          ) : (
+            <button onClick={joinMeeting}>
+              Join
+            </button>
+          )
+      }
+
+      <div>
+        {chunk([...participants.keys()]).map((k) => (
+          <Row>
+            {k.map((participantId) => (
+              <Col span={4}>
+                <ParticipantView
+                  participantId={participantId}
+                  key={participantId}
+                />
+              </Col>
+            ))}
+          </Row>
+        ))}
+      </div>
+
+    </div>
+  )
+}
+
+function ParticipantView(props) {
+  const webcamRef = useRef(null);
+  const screenShareRef = useRef(null);
+  const micRef = useRef(null);
+
+  const {
+    displayName,
+    webcamStream,
+    micStream,
+    screenShareStream,
+    webcamOn,
+    micOn,
+    screenShareOn,
+  } = useParticipant(props.participantId);
+
+  useEffect(() => {
+    if (webcamRef.current) {
+      if (webcamOn) {
+        const mediaStream = new MediaStream();
+        mediaStream.addTrack(webcamStream.track);
+
+        webcamRef.current.srcObject = mediaStream;
+        webcamRef.current
+          .play()
+          .catch((err) =>
+            console.log('videoElem.current.play() failed: ', err)
+          )
+      }
+      else {
+        webcamRef.current.srcObject = null;
+      }
+    }
+  }, [webcamStream, webcamOn]);
+
+  useEffect(() => {
+    if (micRef.current) {
+      if (micOn) {
+        const mediaStream = new MediaStream();
+        mediaStream.addTrack(micStream.track);
+
+        micRef.current.srcObject = mediaStream;
+        micRef.current
+          .play()
+          .catch((err) =>
+            console.log('videoElem.current.play() failed: ', err)
+          )
+      }
+      else {
+        micRef.current.srcObject = null;
+      }
+    }
+  }, [micStream, micOn]);
+
+  useEffect(() => {
+    if (screenShareRef.current) {
+      if (screenShareOn) {
+        const mediaStream = new MediaStream();
+        mediaStream.addTrack(screenShareStream.track);
+
+        screenShareRef.current.srcObject = mediaStream;
+        screenShareRef.current
+          .play()
+          .catch((err) =>
+            console.log('videoElem.current.play() failed: ', err)
+          )
+      }
+      else {
+        screenShareRef.current.srcObject = null;
+      }
+    }
+  }, [screenShareStream, screenShareOn]);
+
+  return (
+    <div key={props.participantId}>
+      <audio ref={micRef} autoPlay />
+      {webcamRef || micOn ? (
+        <div>
+          <h2>{displayName}</h2>
+          <video
+            height={'100%'}
+            width={'100%'}
+            ref={webcamRef}
+            autoPlay
+          />
+        </div>) : (null)
+      }
+      {screenShareOn ? (
+        <div>
+          <h2>Screen Shared</h2>
+          <video
+            height={'100%'}
+            width={'100%'}
+            ref={screenShareRef}
+            autoPlay
+          />
+        </div>) : (null)
+      }
+      <br />
+      <span>
+        Mic: {micOn ? 'On' : 'Off'},
+
+        Webcam: {webcamOn ? 'On' : 'Off'},
+        Screen Share: {screenShareOn ? 'On' : 'Off'},
+      </span>
+    </div>
+  )
+}
+
 function VideoConfrence() {
   const [token, setToken] = useState(null);
   const [meetingId, setMeetingId] = useState(null);
-  const getMeetingToken = async () => {
-    const token1 = await getToken();
-    //console.log("token", token1);
-    setToken(token1);
-    const ID = await getMeetingId(token);
-    //console.log("id", ID);
-    setMeetingId(ID);
-  }
-  console.log("meetingId", meetingId);
-  useEffect(() => {
 
-    getMeetingToken()
-  }, [token])
-  return token ? (
-    <h1>{meetingId}</h1>
-  ) : null
+  const getMeetingAndToken = async () => {
+    const token = await getToken();
+    setToken(token);
+    const fetchedMeetingId = await getMeetingId(token);
+    setMeetingId(fetchedMeetingId);
+    //setMeetingId(meetingId ? meetingId : (await getMeetingId({ token })));
+  }
+
+  const updateMeetingId = (meetingId) => {
+    setMeetingId(meetingId);
+  }
+
+  return token && meetingId ? (
+    <MeetingProvider
+      config={{
+        meetingId,
+        micEnabled: true,
+        webcamEnabled: true,
+        name: "Muhammad's Org",
+      }}
+      token={token}
+    >
+      <MeetingConsumer>
+        {() => <MeetingGrid
+          meetingId={meetingId}
+          getMeetingAndToken={getMeetingAndToken} />
+        }
+      </MeetingConsumer>
+    </MeetingProvider>
+  ) : (<JoinScreen updateMeetingId={updateMeetingId} getMeetingAndToken={getMeetingAndToken} />)
 }
 export default VideoConfrence;
-//In this step, we will Initialise VideoSDK meeting.
-// import React from "react";
-// import { MeetingProvider, } from "@videosdk.live/react-sdk";
-// import MeetingView from "./MeetingView";
-
-
-// const VideoConfrence = () => {
-//   return (
-//     <MeetingProvider
-//       config={{
-//         meetingId: "qtfq-vo56-6a82",
-//         micEnabled: true,
-//         webcamEnabled: true,
-//         name: "Muhammad's Org",
-//       }}
-//       token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIyYjVhNjJhOC04MTA0LTRlZDYtOWEyMi1hNGVjOTY0OThmY2QiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTY5NTU0OTAyNCwiZXhwIjoxNjk1NjM1NDI0fQ.drIYDwLvBCqxtAXWOUcJiELJIHZcnonaElblLNTqhSc"
-//     >
-//       <MeetingView />
-//     </MeetingProvider>
-//   )
-// };
-// export default VideoConfrence;
-
-// VideoConfrence.js
-// import React from "react";
-// import { MeetingProvider } from "@videosdk.live/react-sdk";
-// import MeetingView from "./MeetingView";
-
-// const VideoConference = () => {
-//   return (
-//     <MeetingProvider
-//       config={{
-//         meetingId: "qtfq-vo56-6a82",
-//         micEnabled: true,
-//         webcamEnabled: true,
-//         name: "Muhammad's Org",
-//       }}
-//       token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIyYjVhNjJhOC04MTA0LTRlZDYtOWEyMi1hNGVjOTY0OThmY2QiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTY5NTU0OTAyNCwiZXhwIjoxNjk1NjM1NDI0fQ.drIYDwLvBCqxtAXWOUcJiELJIHZcnonaElblLNTqhSc"
-//     >
-//       <MeetingView />
-//     </MeetingProvider>
-//   );
-// };
-
-// export default VideoConference;
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////*css*/`
-
-
-// import React, { useEffect, useMemo, useRef, useState } from "react";
-// import {
-//   MeetingProvider,
-//   MeetingConsumer,
-//   useMeeting,
-//   useParticipant,
-// } from "@videosdk.live/react-sdk";
-// import { authToken, createMeeting } from "./MeetingView";
-// import ReactPlayer from "react-player";
-
-// function JoinScreen({ getMeetingAndToken }) {
-//   const [meetingId, setMeetingId] = useState(null);
-//   const onClick = async () => {
-//     await getMeetingAndToken(meetingId);
-//   };
-//   return (
-//     <div>
-//       <input
-//         type="text"
-//         placeholder="Enter Meeting Id"
-//         onChange={(e) => {
-//           setMeetingId(e.target.value);
-//         }}
-//       />
-//       <button onClick={onClick}>Join</button>
-//       {" or "}
-//       <button onClick={onClick}>Create Meeting</button>
-//     </div>
-//   );
-// }
-
-// function MeetingView(props) {
-//   const [joined, setJoined] = useState(null);
-//   //Get the method which will be used to join the meeting.
-//   //We will also get the participants list to display all participants
-//   const { join, participants } = useMeeting({
-//     //callback for when meeting is joined successfully
-//     onMeetingJoined: () => {
-//       setJoined("JOINED");
-//     },
-//     //callback for when meeting is left
-//     onMeetingLeft: () => {
-//       props.onMeetingLeave();
-//     },
-//   });
-//   const joinMeeting = () => {
-//     setJoined("JOINING");
-//     join();
-//   };
-
-//   return (
-//     <div className="container">
-//       <h3>Meeting Id: {props.meetingId}</h3>
-//       {joined && joined === "JOINED" ? (
-//         <div>
-//           <Controls />
-//           {/* For rendering all the participants in the meeting */}
-//           {[...participants.keys()].map((participantId) => (
-//             <ParticipantView
-//               participantId={participantId}
-//               key={participantId}
-//             />
-//           ))}
-//         </div>
-//       ) : joined && joined === "JOINING" ? (
-//         <p>Joining the meeting...</p>
-//       ) : (
-//         <button onClick={joinMeeting}>Join</button>
-//       )}
-//     </div>
-//   );
-// }
-
-// function Controls() {
-//   const { leave, toggleMic, toggleWebcam } = useMeeting();
-//   return (
-//     <div>
-//       <button onClick={() => leave()}>Leave</button>
-//       <button onClick={() => toggleMic()}>toggleMic</button>
-//       <button onClick={() => toggleWebcam()}>toggleWebcam</button>
-//     </div>
-//   );
-// }
-
-// function ParticipantView(props) {
-//   const micRef = useRef(null);
-//   const { webcamStream, micStream, webcamOn, micOn, isLocal, displayName } =
-//     useParticipant(props.participantId);
-
-//   const videoStream = useMemo(() => {
-//     if (webcamOn && webcamStream) {
-//       const mediaStream = new MediaStream();
-//       mediaStream.addTrack(webcamStream.track);
-//       return mediaStream;
-//     }
-//   }, [webcamStream, webcamOn]);
-
-//   useEffect(() => {
-//     if (micRef.current) {
-//       if (micOn && micStream) {
-//         const mediaStream = new MediaStream();
-//         mediaStream.addTrack(micStream.track);
-
-//         micRef.current.srcObject = mediaStream;
-//         micRef.current
-//           .play()
-//           .catch((error) =>
-//             console.error("videoElem.current.play() failed", error)
-//           );
-//       } else {
-//         micRef.current.srcObject = null;
-//       }
-//     }
-//   }, [micStream, micOn]);
-
-//   return (
-//     <div>
-//       <p>
-//         Participant: {displayName} | Webcam: {webcamOn ? "ON" : "OFF"} | Mic:{" "}
-//         {micOn ? "ON" : "OFF"}
-//       </p>
-//       <audio ref={micRef} autoPlay playsInline muted={isLocal} />
-//       {webcamOn && (
-//         <ReactPlayer
-//           //
-//           playsinline // very very imp prop
-//           pip={false}
-//           light={false}
-//           controls={false}
-//           muted={true}
-//           playing={true}
-//           //
-//           url={videoStream}
-//           //
-//           height={"300px"}
-//           width={"300px"}
-//           onError={(err) => {
-//             console.log(err, "participant video error");
-//           }}
-//         />
-//       )}
-//     </div>
-//   );
-// }
-
-// function VideoConference() {
-//   const [meetingId, setMeetingId] = useState(null);
-
-//   //Getting the meeting id by calling the api we just wrote
-//   const getMeetingAndToken = async (id) => {
-//     const meetingId =
-//       id == null ? await createMeeting({ token: authToken }) : id;
-//     setMeetingId(meetingId);
-//   };
-
-//   //This will set Meeting Id to null when meeting is left or ended
-//   const onMeetingLeave = () => {
-//     setMeetingId(null);
-//   };
-
-//   return authToken && meetingId ? (
-//     <MeetingProvider
-//       config={{
-//         meetingId,
-//         micEnabled: true,
-//         webcamEnabled: true,
-//         name: "C.V. Raman",
-//       }}
-//       token={authToken}
-//     >
-//       <MeetingView meetingId={meetingId} onMeetingLeave={onMeetingLeave} />
-//     </MeetingProvider>
-//   ) : (
-//     <JoinScreen getMeetingAndToken={getMeetingAndToken} />
-//   );
-// }
-
-// export default VideoConference;

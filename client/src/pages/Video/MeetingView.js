@@ -27,6 +27,7 @@ export const getMeetingId = async (token) => {
     };
     const response = await fetch(VIDEOSDK_API_ENDPOINT, options).then(async (result) => {
       const { meetingId } = await result.json();
+      console.log("meetingId", meetingId);
       return meetingId;
     }).catch((err) => {
       console.log("aa", err.message);
