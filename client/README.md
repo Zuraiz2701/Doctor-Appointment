@@ -1,3 +1,11 @@
+{
+  /*
+  "@daily-co/daily-js": "^0.51.1",
+    "@daily-co/daily-react": "^0.12.0",
+    "@zegocloud/zego-uikit-prebuilt": "^1.8.11",
+  */
+}
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

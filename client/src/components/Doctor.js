@@ -80,16 +80,16 @@ function Doctor({ doctor }) {
       </div>
       <div>
         <h1 className="card-title" style={titleStyle}>
-          {doctor.firstName} {doctor.lastName}
+          Dr. {doctor.firstName} {doctor.lastName}
         </h1>
         <div style={infoStyle}>
           <p>
-            <b>Phone Number:</b>{" "}
-            <span style={{ color: "#ffffff" }}>{doctor.phoneNumber}</span>
+            <b>Specialization:</b>{" "}
+            <span style={{ color: "#ffffff" }}>{doctor.specialization}</span>
           </p>
           <p>
             <b>Fee per Visit:</b>{" "}
-            <span style={{ color: "#ffffff" }}>{doctor.feePerCunsultation}</span>
+            <span style={{ color: "#ffffff" }}>Rs {doctor.feePerCunsultation}</span>
           </p>
           <p>
             <b>Timings:</b>{" "}

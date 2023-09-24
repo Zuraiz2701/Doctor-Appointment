@@ -1,71 +1,82 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
+const morgan = require('morgan');
+const fetch = require("node-fetch");
+//const { default: fetch } = require("node-fetch");
+const jwtoken = require("jsonwebtoken");
 const dbConfig = require("./config/dbConfig");
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+
 const userRoute = require("./routes/userRoute");
 const adminRoute = require("./routes/adminRoute");
 const doctorRoute = require("./routes/doctorsRoute");
 const path = require("path");
-const multer = require('multer');
+
 const fileUpload = require('express-fileupload')
 app.use(fileUpload(
   {
     useTempFiles: true,
     // tempFileDir: '/tmp/',
-    // createParentPath: true
+    // createParentPath: true,
   }
 ));
 app.use("/api/user", userRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/doctor", doctorRoute);
 
-// Configure Multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads'); // Save files to the 'uploads' directory
-  },
-  filename: (req, file, cb) => {
-    // Generate a unique filename using crypto
-    const filename = crypto.randomBytes(16).toString('hex') + path.extname(file.originalname);
-    cb(null, filename);
-  },
+// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+app.get("/get-token", (req, res) => {
+  const API_KEY = process.env.VIDEOSDK_API_KEY;
+  const SECRET_KEY = process.env.VIDEOSDK_SECRET_KEY;
+
+  const options = { expiresIn: "10m", algorithm: "HS256" };
+
+  const payload = {
+    apikey: API_KEY,
+    permissions: ["allow_join", "allow_mod"], // also accepts "ask_join"
+  };
+
+  const token = jwtoken.sign(payload, SECRET_KEY, options);
+  res.json({ token });
 });
 
-const upload = multer({ storage });
+//
+app.post("/create-meeting", (req, res) => {
+  const { token, region } = req.body;
+  const url = `https://api.videosdk.live/api/meetings`;
+  const options = {
+    method: "POST",
+    headers: { Authorization: token, "Content-Type": "application/json" },
+    body: JSON.stringify({ region }),
+  };
 
-// Serve uploaded files statically (for testing)
-app.use('/uploads', express.static('uploads'));
-
-// Handle file uploads
-app.post('/upload', upload.single('photo'), (req, res) => {
-  try {
-    // Assuming the file has been successfully uploaded and saved
-
-    // Construct the file URL
-    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-
-    // Calculate MD5 hash of the uploaded file (you can use a library like crypto)
-    const fileData = fs.readFileSync(req.file.path);
-    const md5 = crypto.createHash('md5').update(fileData).digest('hex');
-
-    // Respond with the file data and URL
-    res.json({
-      name: req.file.originalname,
-      data: fileData,
-      size: req.file.size,
-      encoding: req.file.encoding,
-      tempFilePath: req.file.path,
-      truncated: req.file.truncated,
-      mimetype: req.file.mimetype,
-      md5,
-      url: fileUrl,
-    });
-  } catch (error) {
-    console.error('Error handling file upload:', error);
-    res.status(500).json({ error: 'File upload failed' });
-  }
+  fetch(url, options)
+    .then((response) => response.json())
+    .then((result) => res.json(result)) // result will contain meetingId
+    .catch((error) => console.error("error", error.message));
 });
+
+//
+app.post("/validate-meeting/:meetingId", (req, res) => {
+  const token = req.body.token;
+  const meetingId = req.params.meetingId;
+
+  const url = `${process.env.VIDEOSDK_API_ENDPOINT}/api/meetings/${meetingId}`;
+
+  const options = {
+    method: "POST",
+    headers: { Authorization: token },
+  };
+
+  fetch(url, options)
+    .then((response) => response.json())
+    .then((result) => res.json(result)) // result will contain meetingId
+    .catch((error) => console.error("error", error));
+});
+// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 if (process.env.NODE_ENV === "production") {
   app.use("/", express.static("client/build"));
