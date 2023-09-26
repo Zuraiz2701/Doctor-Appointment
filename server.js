@@ -1,10 +1,52 @@
 const express = require("express");
+const http = require("http")
 const app = express();
+const server = http.createServer(app)
+//console.log(server)
+const cors = require("cors");
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST"]
+}));
+//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+const io = require('socket.io')(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"]
+  }
+});
+// const socket = require("socket.io")
+// const io = socket(server)
+
+io.on("connection", (socket) => {
+  socket.emit("me", socket.id)
+
+  socket.on("disconnect", () => {
+    socket.broadcast.emit("callEnded")
+  })
+
+  socket.on(
+    "callUser",
+    (data) => {
+      io.to(data.userToCall).emit("callUser",
+        {
+          signal: data.signalData,
+          from: data.from,
+          name: data.name
+        })
+    }
+  )
+
+  socket.on("answerCall", (data) => {
+    io.to(data.to).emit("callAccepted", data.signal)
+  })
+})
+//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
 require("dotenv").config();
 const morgan = require('morgan');
-const fetch = require("node-fetch");
-//const { default: fetch } = require("node-fetch");
-const jwtoken = require("jsonwebtoken");
+//const fetch = require("node-fetch");
+
 const dbConfig = require("./config/dbConfig");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -27,57 +69,6 @@ app.use("/api/user", userRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/doctor", doctorRoute);
 
-// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-app.get("/get-token", (req, res) => {
-  const API_KEY = process.env.VIDEOSDK_API_KEY;
-  const SECRET_KEY = process.env.VIDEOSDK_SECRET_KEY;
-
-  const options = { expiresIn: "10m", algorithm: "HS256" };
-
-  const payload = {
-    apikey: API_KEY,
-    permissions: ["allow_join", "allow_mod"], // also accepts "ask_join"
-  };
-
-  const token = jwtoken.sign(payload, SECRET_KEY, options);
-  res.json({ token });
-});
-
-//
-app.post("/create-meeting", (req, res) => {
-  const { token, region } = req.body;
-  const url = `https://api.videosdk.live/api/meetings`;
-  const options = {
-    method: "POST",
-    headers: { Authorization: token, "Content-Type": "application/json" },
-    body: JSON.stringify({ region }),
-  };
-
-  fetch(url, options)
-    .then((response) => response.json())
-    .then((result) => res.json(result)) // result will contain meetingId
-    .catch((error) => console.error("error", error.message));
-});
-
-//
-app.post("/validate-meeting/:meetingId", (req, res) => {
-  const token = req.body.token;
-  const meetingId = req.params.meetingId;
-
-  const url = `${process.env.VIDEOSDK_API_ENDPOINT}/api/meetings/${meetingId}`;
-
-  const options = {
-    method: "POST",
-    headers: { Authorization: token },
-  };
-
-  fetch(url, options)
-    .then((response) => response.json())
-    .then((result) => res.json(result)) // result will contain meetingId
-    .catch((error) => console.error("error", error));
-});
-// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
 if (process.env.NODE_ENV === "production") {
   app.use("/", express.static("client/build"));
 
@@ -88,4 +79,6 @@ if (process.env.NODE_ENV === "production") {
 const port = process.env.PORT || 5000;
 
 app.get("/", (req, res) => res.send("Hello World!"));
+
+server.listen(5001, () => console.log("server is running on port 5001"))
 app.listen(port, () => console.log(`Node Express Server Started at ${port}!`));
