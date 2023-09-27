@@ -8,10 +8,13 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import Peer from "simple-peer";
 import io from "socket.io-client";
 import "./Video.css";
+import { useNavigate } from "react-router-dom";
 
 const socket = io.connect('http://localhost:5001');
 
 function VideoConfrence() {
+
+  const navigate = useNavigate();
   const [me, setMe] = useState("");
   const [stream, setStream] = useState();
   const [receivingCall, setReceivingCall] = useState(false);
@@ -96,6 +99,7 @@ function VideoConfrence() {
 
   const leaveCall = () => {
     setCallEnded(true);
+    navigate("/");
     window.location.reload();
   };
 

@@ -6,8 +6,13 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 import { Table } from "antd";
 import moment from "moment";
+import { useNavigate } from "react-router-dom";
+
 
 function DoctorAppointments() {
+
+  const navigate = useNavigate();
+  //const [me, setMe] = useState("");
   const [appointments, setAppointments] = useState([]);
   const dispatch = useDispatch();
   const getAppointmentsData = async () => {
@@ -52,6 +57,12 @@ function DoctorAppointments() {
       dispatch(hideLoading());
     }
   };
+
+  const handleClick = () => {
+    //localStorage.clear();
+    navigate(`/video`)
+    window.location.reload();
+  }
   const columns = [
     {
       title: "Id",
@@ -105,10 +116,24 @@ function DoctorAppointments() {
         </div>
       ),
     },
+
+    {
+      title: "Video Consult",
+      dataIndex: "videoConsult",
+      render: (text, record) => (
+        record.status === "approved" ? (
+          <button className="anchor" onClick={handleClick}>Start Video Consult</button>
+        ) : (
+          <span>Video Consult not available</span>
+        )
+      ),
+    },
   ];
   useEffect(() => {
+
     getAppointmentsData();
   }, []);
+
   return (
     <Layout>
       <h1 className="page-header">Appointments</h1>
