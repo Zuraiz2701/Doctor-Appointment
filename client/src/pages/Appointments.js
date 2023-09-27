@@ -62,7 +62,11 @@ function Appointments() {
     {
       title: "Status",
       dataIndex: "status",
-    }
+    },
+    {
+      title: "Video ID",
+      dataIndex: "videoId", // This should match the name of the property in your data
+    },
   ];
   useEffect(() => {
     getAppointmentsData();

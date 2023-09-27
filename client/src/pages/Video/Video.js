@@ -9,11 +9,21 @@ import Peer from "simple-peer";
 import io from "socket.io-client";
 import "./Video.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { showLoading, hideLoading } from "../../redux/alertsSlice";
+import { toast } from "react-hot-toast";
+import { useParams } from "react-router-dom";
+
 
 const socket = io.connect('http://localhost:5001');
 
 function VideoConfrence() {
 
+  const dispatch = useDispatch();
+  const { id } = useParams();
+  console.log("id", id);
+  const [appointments, setAppointments] = useState([]);
   const navigate = useNavigate();
   const [me, setMe] = useState("");
   const [stream, setStream] = useState();
@@ -28,7 +38,33 @@ function VideoConfrence() {
   const userVideo = useRef();
   const connectionRef = useRef();
 
+
+
+
+  const changeAppointmentVideoId = async (appId, id) => {
+    try {
+      dispatch(showLoading());
+      const resposne = await axios.post(
+        "/api/doctor/store-video-id",
+        { appointmentId: appId, videoId: id },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      dispatch(hideLoading());
+      if (resposne.data.success) {
+        toast.success(resposne.data.message);
+      }
+    } catch (error) {
+      toast.error("Error changing doctor account status");
+      dispatch(hideLoading());
+    }
+  };
+
   useEffect(() => {
+
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
@@ -42,8 +78,10 @@ function VideoConfrence() {
         console.error('Error accessing media devices:', error);
       });
 
-    socket.on("me", (id) => {
-      setMe(id);
+    socket.on("me", (ids) => {
+      setMe(ids);
+      console.log("me", id);
+      changeAppointmentVideoId(id, ids)
     });
 
     socket.on("callUser", (data) => {

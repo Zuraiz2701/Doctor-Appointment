@@ -30,6 +30,10 @@ const appointmentSchema = new mongoose.Schema(
       required: true,
       default: "pending",
     },
+    videoId: {
+      type: String,
+      default: "videoId will be available at appointment date and time",
+    }
   },
   {
     timestamps: true,

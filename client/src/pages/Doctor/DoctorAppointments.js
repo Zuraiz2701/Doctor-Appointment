@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 function DoctorAppointments() {
 
   const navigate = useNavigate();
-  //const [me, setMe] = useState("");
   const [appointments, setAppointments] = useState([]);
   const dispatch = useDispatch();
   const getAppointmentsData = async () => {
@@ -58,9 +57,11 @@ function DoctorAppointments() {
     }
   };
 
-  const handleClick = () => {
+  const handleClick = (id) => {
     //localStorage.clear();
-    navigate(`/video`)
+    //navigate(`/video`)
+    console.log("id", id);
+    navigate(`/video/${id}`);
     window.location.reload();
   }
   const columns = [
@@ -116,18 +117,36 @@ function DoctorAppointments() {
         </div>
       ),
     },
-
     {
       title: "Video Consult",
       dataIndex: "videoConsult",
-      render: (text, record) => (
-        record.status === "approved" ? (
-          <button className="anchor" onClick={handleClick}>Start Video Consult</button>
-        ) : (
-          <span>Video Consult not available</span>
-        )
-      ),
+      render: (text, record) => {
+        const appointmentDateTime = moment(record.date);
+        appointmentDateTime.set({ hour: moment(record.time).get('hour'), minute: moment(record.time).get('minute') });
+        const currentDateTime = moment();
+
+        console.log("Record Date:", record.date);
+        console.log("Record Time:", record.time);
+        console.log("Formatted Appointment DateTime:", appointmentDateTime.format("DD-MM-YYYY HH:mm"));
+        console.log("Current DateTime:", currentDateTime.format("DD-MM-YYYY HH:mm"));
+
+        if (
+          record.status === "approved" &&
+          appointmentDateTime.isSameOrBefore(currentDateTime)
+        ) {
+          return (
+            <button className="anchor" onClick={() => handleClick(record._id)}>
+              Start Video Consult
+            </button>
+          );
+        } else {
+          return <span>Video Consult not available</span>;
+        }
+      },
     },
+
+
+
   ];
   useEffect(() => {
 

@@ -122,7 +122,7 @@ function App() {
         />
 
         <Route
-          path="/video"
+          path="/video/:id"
           element={
             <ProtectedRoute>
               <VideoConfrence />

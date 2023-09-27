@@ -79,6 +79,7 @@ router.get(
 router.post("/change-appointment-status", authMiddleware, async (req, res) => {
   try {
     const { appointmentId, status } = req.body;
+    //console.log(req.body);
     const appointment = await Appointment.findByIdAndUpdate(appointmentId, {
       status,
     });
@@ -106,5 +107,59 @@ router.post("/change-appointment-status", authMiddleware, async (req, res) => {
     });
   }
 });
+
+router.post("/store-video-id", authMiddleware, async (req, res) => {
+  try {
+    const { appointmentId, videoId } = req.body;
+
+    // Find the appointment by ID and update the videoId
+    const appointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { videoId },
+      { new: true }
+    );
+
+    console.log(appointment);
+
+    if (!appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    // Fetch user information for sending notifications
+    const user = await User.findOne({ _id: appointment.userId });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Push a notification to the user
+    const message = `The videoId is ${videoId} for Appointment ID: ${appointmentId}`;
+    const notification = {
+      type: "videoId-stored",
+      message,
+      onClickPath: "/appointments",
+    };
+
+    // Push the notification to the user's unseen notifications
+    user.unseenNotifications.push(notification);
+
+    // Save the user with the new notification
+    await user.save();
+
+    res.status(200).json({
+      message: "Video ID stored successfully",
+      success: true,
+      appointment,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      message: "Error storing Video ID",
+      success: false,
+      error,
+    });
+  }
+});
+
 
 module.exports = router;
