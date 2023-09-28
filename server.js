@@ -15,8 +15,6 @@ const io = require('socket.io')(server, {
     methods: ["GET", "POST"]
   }
 });
-// const socket = require("socket.io")
-// const io = socket(server)
 
 io.on("connection", (socket) => {
   socket.emit("me", socket.id)

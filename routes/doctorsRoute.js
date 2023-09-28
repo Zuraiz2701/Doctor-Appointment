@@ -54,6 +54,38 @@ router.post("/update-doctor-profile", authMiddleware, async (req, res) => {
 });
 
 router.get(
+  "/get-appointment-by-appointment-id",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { appointmentId } = req.query; // Use req.query to get query parameters
+      const appointment = await Appointment.findOne({ _id: appointmentId });
+
+      if (!appointment) {
+        return res.status(404).send({
+          message: "Appointment not found",
+          success: false,
+        });
+      }
+
+      res.status(200).send({
+        message: "Appointment fetched successfully",
+        success: true,
+        data: appointment,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({
+        message: "Error fetching appointment",
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+);
+
+
+router.get(
   "/get-appointments-by-doctor-id",
   authMiddleware,
   async (req, res) => {
@@ -119,7 +151,7 @@ router.post("/store-video-id", authMiddleware, async (req, res) => {
       { new: true }
     );
 
-    console.log(appointment);
+    //console.log(appointment);
 
     if (!appointment) {
       return res.status(404).json({ error: 'Appointment not found' });

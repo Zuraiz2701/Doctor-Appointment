@@ -57,11 +57,12 @@ function DoctorAppointments() {
     }
   };
 
-  const handleClick = (id) => {
+  const handleClick = (id, isDoctor) => {
     //localStorage.clear();
     //navigate(`/video`)
     console.log("id", id);
-    navigate(`/video/${id}`);
+    //navigate(`/video/${id}`);
+    navigate(`/video/${id}?isDoctor=${isDoctor}`);
     window.location.reload();
   }
   const columns = [
@@ -135,7 +136,7 @@ function DoctorAppointments() {
           appointmentDateTime.isSameOrBefore(currentDateTime)
         ) {
           return (
-            <button className="anchor" onClick={() => handleClick(record._id)}>
+            <button className="anchor" onClick={() => handleClick(record._id, true)}>
               Start Video Consult
             </button>
           );

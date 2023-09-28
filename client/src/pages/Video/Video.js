@@ -13,7 +13,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { toast } from "react-hot-toast";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 
 
 const socket = io.connect('http://localhost:5001');
@@ -22,8 +22,11 @@ function VideoConfrence() {
 
   const dispatch = useDispatch();
   const { id } = useParams();
-  console.log("id", id);
-  const [appointments, setAppointments] = useState([]);
+  const location = useLocation();
+  const isDoctor = new URLSearchParams(location.search).get("isDoctor");
+  console.log("isDoctor", isDoctor);
+  //  console.log("id", id);
+  const [appointment, setAppointment] = useState([]);
   const navigate = useNavigate();
   const [me, setMe] = useState("");
   const [stream, setStream] = useState();
@@ -31,7 +34,7 @@ function VideoConfrence() {
   const [caller, setCaller] = useState("");
   const [callerSignal, setCallerSignal] = useState();
   const [callAccepted, setCallAccepted] = useState(false);
-  const [idToCall, setIdToCall] = useState("");
+  //const [idToCall, setIdToCall] = useState("");
   const [callEnded, setCallEnded] = useState(false);
   const [name, setName] = useState("");
   const myVideo = useRef();
@@ -39,7 +42,27 @@ function VideoConfrence() {
   const connectionRef = useRef();
 
 
-
+  const getAppointmentData = async (appointmentId) => {
+    //console.log("appointmentId", appointmentId);
+    try {
+      dispatch(showLoading());
+      const response = await axios.get(
+        `/api/doctor/get-appointment-by-appointment-id?appointmentId=${appointmentId}`, // Send appointmentId as a query parameter
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      dispatch(hideLoading());
+      if (response.data.success) {
+        setAppointment(response.data.data);
+        console.log("appointment", appointment);
+      }
+    } catch (error) {
+      dispatch(hideLoading());
+    }
+  };
 
   const changeAppointmentVideoId = async (appId, id) => {
     try {
@@ -56,6 +79,7 @@ function VideoConfrence() {
       dispatch(hideLoading());
       if (resposne.data.success) {
         toast.success(resposne.data.message);
+        getAppointmentData(appId);
       }
     } catch (error) {
       toast.error("Error changing doctor account status");
@@ -80,8 +104,15 @@ function VideoConfrence() {
 
     socket.on("me", (ids) => {
       setMe(ids);
-      console.log("me", id);
-      changeAppointmentVideoId(id, ids)
+      console.log("me", ids);
+
+      if (isDoctor === "true") {
+        changeAppointmentVideoId(id, ids);
+      }
+      if (isDoctor === "false") {
+        getAppointmentData(id);
+        console.log("Name: ", appointment.userInfo.name)
+      }
     });
 
     socket.on("callUser", (data) => {
@@ -145,30 +176,11 @@ function VideoConfrence() {
     <div className="app-container">
       <div className="sidebar">
         <h1 style={{ textAlign: "center", color: "#fff" }}>E-MEd</h1>
-        <TextField
-          id="filled-basic"
-          label="Name"
-          variant="filled"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          style={{ marginBottom: "20px" }}
-        />
-        <CopyToClipboard text={me} style={{ marginBottom: "2rem" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AssignmentIcon fontSize="large" />}
-          >
-            Copy ID
-          </Button>
-        </CopyToClipboard>
-        <TextField
-          id="filled-basic"
-          label="ID to call"
-          variant="filled"
-          value={idToCall}
-          onChange={(e) => setIdToCall(e.target.value)}
-        />
+        {isDoctor !== "true" && (
+          <div>
+
+          </div>
+        )}
         <div className="call-button">
           {callAccepted && !callEnded ? (
             <Button variant="contained" color="secondary" onClick={leaveCall}>
@@ -178,16 +190,16 @@ function VideoConfrence() {
             <IconButton
               color="primary"
               aria-label="call"
-              onClick={() => callUser(idToCall)}
+              onClick={() => callUser(appointment.videoId)}
             >
               <PhoneIcon fontSize="large" />
             </IconButton>
           )}
-          {idToCall}
+          {appointment.videoId}
         </div>
         {receivingCall && !callAccepted ? (
           <div className="caller">
-            <h1>{name} is calling...</h1>
+            <h1>{appointment.userInfo.name} is calling...</h1>
             <Button variant="contained" color="primary" onClick={answerCall} style={{
               color: 'white',
               background_color: ' #013737',
@@ -224,6 +236,7 @@ function VideoConfrence() {
       </div>
     </div>
   );
+
 }
 
 export default VideoConfrence;

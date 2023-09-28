@@ -32,7 +32,7 @@ const appointmentSchema = new mongoose.Schema(
     },
     videoId: {
       type: String,
-      default: "videoId will be available at appointment date and time",
+      default: "videoId will be available at appointment date and time when doctor starts the video call",
     }
   },
   {

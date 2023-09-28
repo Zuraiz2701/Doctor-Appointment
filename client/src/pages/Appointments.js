@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Layout from "../components/Layout";
 import { showLoading, hideLoading } from "../redux/alertsSlice";
-import { toast } from "react-hot-toast";
 import axios from "axios";
 import { Table } from "antd";
 import moment from "moment";
 import "./Appointments.css";
+import { useNavigate } from "react-router-dom";
 
 function Appointments() {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const dispatch = useDispatch();
   const getAppointmentsData = async () => {
@@ -27,6 +28,14 @@ function Appointments() {
       dispatch(hideLoading());
     }
   };
+
+
+  const handleVideoButtonClick = (isDoctor, id) => {
+    console.log("id", id);
+    navigate(`/video/${id}?isDoctor=${isDoctor}`);
+    window.location.reload();
+  }
+
   const columns = [
     {
       title: "Id",
@@ -65,7 +74,16 @@ function Appointments() {
     },
     {
       title: "Video ID",
-      dataIndex: "videoId", // This should match the name of the property in your data
+      dataIndex: "videoId",
+      render: (text, record) => (
+        <span>
+          {record.videoId !== "" && record.videoId !== "videoId will be available at appointment date and time when doctor starts the video call" ? (
+            <button onClick={() => handleVideoButtonClick(false, record._id)}>
+              View Video
+            </button>
+          ) : null}
+        </span>
+      ),
     },
   ];
   useEffect(() => {
