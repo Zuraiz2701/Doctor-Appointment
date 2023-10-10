@@ -32,11 +32,6 @@ function Layout({ children }) {
 
   const doctorMenu = [
     {
-      name: "Home",
-      path: "/",
-      icon: "ri-home-line",
-    },
-    {
       name: "Appointments",
       path: "/doctor/appointments",
       icon: "ri-file-list-line",
@@ -49,11 +44,6 @@ function Layout({ children }) {
   ];
 
   const adminMenu = [
-    {
-      name: "Home",
-      path: "/",
-      icon: "ri-home-line",
-    },
     {
       name: "Users",
       path: "/admin/userslist",
