@@ -56,6 +56,12 @@ function Register() {
       callback("Password is required");
     } else if (value.length < 8) {
       callback("Password must be at least 8 characters long");
+    } else if (!/[A-Z]/.test(value)) {
+      callback("Password must contain at least one capital letter");
+    } else if (!/\d/.test(value)) {
+      callback("Password must contain at least one number");
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+      callback("Password must contain at least one symbol");
     } else {
       callback(); // Pass validation
     }
