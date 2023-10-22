@@ -1,0 +1,28 @@
+/* Welcome.css */
+.welcome-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    background: url('3.png') center/cover no-repeat;
+    color: #fff;
+    /* Adjust text color for better contrast */
+}
+
+.welcome-content {
+    margin-bottom: 30px;
+    color: #fff;
+}
+
+.welcome-heading {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #005555;
+}
+
+.welcome-subtitle {
+    font-size: 1.5rem;
+    color: #fff;
+}

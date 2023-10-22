@@ -14,8 +14,8 @@ function Layout({ children }) {
   const location = useLocation();
   const userMenu = [
     {
-      name: "Home",
-      path: "/",
+      name: "Book Doctor",
+      path: "/home",
       icon: "ri-home-line",
     },
     {
@@ -33,7 +33,7 @@ function Layout({ children }) {
   const doctorMenu = [
     {
       name: "Appointments",
-      path: "/doctor/appointments",
+      path: "/doctor/p",
       icon: "ri-file-list-line",
     },
     {

@@ -16,6 +16,7 @@ import BookAppointment from "./pages/BookAppointment";
 import Appointments from "./pages/Appointments";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
 import VideoConfrence from "./pages/Video/Video";
+import Welcome from "./pages/Welcome";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -46,6 +47,14 @@ function App() {
         />
         <Route
           path="/"
+          element={
+            <ProtectedRoute>
+              <Welcome />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/home"
           element={
             <ProtectedRoute>
               <Home />

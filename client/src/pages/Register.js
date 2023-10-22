@@ -68,7 +68,7 @@ function Register() {
   };
 
   return (
-    <div className="authentication">
+    <div className="authentication r-container">
       <div className="authentication-form card p-3">
         <h1 className="card-title">Nice To Meet U</h1>
         <Form layout="vertical" onFinish={onFinish}>
