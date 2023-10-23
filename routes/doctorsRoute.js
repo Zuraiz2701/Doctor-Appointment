@@ -4,6 +4,14 @@ const Doctor = require("../models/doctorModel");
 const authMiddleware = require("../middlewares/authMiddleware");
 const Appointment = require("../models/appointmentModel");
 const User = require("../models/userModel");
+const moment = require("moment");
+
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+  cloud_name: 'dicrko3r2',
+  api_key: '343791644752978',
+  api_secret: 'Shoyrv1UOoVVVg6kJ5qf50PCi_I'
+});
 
 router.post("/get-doctor-info-by-user-id", authMiddleware, async (req, res) => {
   try {
@@ -35,21 +43,64 @@ router.post("/get-doctor-info-by-id", authMiddleware, async (req, res) => {
   }
 });
 
+// router.post("/update-doctor-profile", authMiddleware, async (req, res) => {
+//   try {
+//     const doctor = await Doctor.findOneAndUpdate(
+//       { userId: req.body.userId },
+//       req.body
+//     );
+//     res.status(200).send({
+//       success: true,
+//       message: "Doctor profile updated successfully",
+//       data: doctor,
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .send({ message: "Error getting doctor info", success: false, error });
+//   }
+// });
+
 router.post("/update-doctor-profile", authMiddleware, async (req, res) => {
   try {
-    const doctor = await Doctor.findOneAndUpdate(
-      { userId: req.body.userId },
-      req.body
-    );
-    res.status(200).send({
-      success: true,
-      message: "Doctor profile updated successfully",
-      data: doctor,
+    const file = req.files.photo;
+    console.log('file is ', file);
+
+    // Upload photo to Cloudinary
+    cloudinary.uploader.upload(file.tempFilePath, async (uploadErr, result) => {
+      if (uploadErr) {
+        console.error('Error uploading file to Cloudinary:', uploadErr);
+        return res.status(500).json({
+          message: "Error uploading photo to Cloudinary",
+          success: false,
+          error: uploadErr,
+        });
+      }
+
+      console.log('result is ', result);
+      console.log('URL is ', result.url);
+
+      // Update doctor profile with new data including the photo URL
+      const updatedDoctor = await Doctor.findOneAndUpdate(
+        { userId: req.body.userId },
+        { ...req.body, photo: result.url },
+        { new: true }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Doctor profile updated successfully",
+        data: updatedDoctor,
+        photoUrl: result.url, // Optionally send the Cloudinary URL in the response.
+      });
     });
   } catch (error) {
-    res
-      .status(500)
-      .send({ message: "Error getting doctor info", success: false, error });
+    console.error('Error updating doctor profile:', error);
+    res.status(500).json({
+      message: "Error updating doctor profile",
+      success: false,
+      error,
+    });
   }
 });
 

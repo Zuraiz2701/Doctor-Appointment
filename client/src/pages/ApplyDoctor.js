@@ -23,11 +23,7 @@ function ApplyDoctor() {
       formData.append('photo', file);
 
 
-      // Format the timings field within the values object
-      // values.timings = [
-      //   moment(values.timings[0]).format("HH:mm"),
-      //   moment(values.timings[1]).format("HH:mm"),
-      // ];
+
 
       // Format the timings field within the values object
       const timings = values.timings.map((time, index) => ({
@@ -82,9 +78,6 @@ function ApplyDoctor() {
     <Layout>
       <h1 className="page-title">Apply Doctor</h1>
       <hr />
-
-      {/*  <DoctorForm onFinish={onFinish} />*/}
-
 
       <Form
         layout="vertical"
