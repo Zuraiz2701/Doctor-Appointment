@@ -6,6 +6,7 @@ import "./DoctorSearchBar.css"; // Import the CSS file
 function DoctorSearchBar({ searchQuery, setSearchQuery, handleSearch }) {
     return (
         <div className="search-bar-container">
+            <h6>Name</h6>
             <input
                 type="text"
                 placeholder="Search by name"
@@ -13,9 +14,9 @@ function DoctorSearchBar({ searchQuery, setSearchQuery, handleSearch }) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="search-input" // Apply a CSS class to the input
             />
-            <button onClick={handleSearch} className="search-button">
+            {/* <button onClick={handleSearch} className="search-button">
                 Search
-            </button>
+            </button> */}
         </div>
     );
 }

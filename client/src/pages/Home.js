@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../redux/alertsSlice";
 import DoctorSearchBar from "../components/DoctorSearchBar";
 import "./Home.css"; // Import the CSS file
+import SpecializationSearchBar from "../components/SpecializationSearchBar";
 
 function Home() {
   const [doctors, setDoctors] = useState([]);
@@ -16,6 +17,8 @@ function Home() {
   const [selectedOption, setSelectedOption] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchQuery, setSearchQuery] = useState("");
+  const [specializationQuery, setSpecializationQuery] = useState("");
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -40,15 +43,14 @@ function Home() {
     getData();
   }, [dispatch]);
 
-
-  const handleSearch = () => {
+  const applyFilters = () => {
     let filteredResults = doctors.filter((doctor) => {
       const fullName = `${doctor.firstName} ${doctor.lastName}`;
-      const specializations = doctor.specializations ? doctor.specializations.join(" ") : ""; // Check if specializations is defined
+      const specialization = `${doctor.specialization}`;
 
       return (
-        fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        specializations.toLowerCase().includes(searchQuery.toLowerCase())
+        fullName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        specialization.toLowerCase().includes(specializationQuery.toLowerCase())
       );
     });
 
@@ -64,44 +66,34 @@ function Home() {
       } else if (selectedOption === "experience") {
         return sortOrder === "asc" ? a[selectedOption] - b[selectedOption] : b[selectedOption] - a[selectedOption];
       }
-      return 0; // No sorting for other attributes
+      return 0;
     });
 
     setFilteredDoctors(filteredResults);
   };
 
+  const handleSpecializationSearch = () => {
+    applyFilters();
+  };
+
+  const handleSearch = () => {
+    applyFilters();
+  };
 
   const handleSort = (option) => {
-    if (option === "name" || option === "experience") {
-      const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
-      setSortOrder(newSortOrder);
+    if (option === selectedOption) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
       setSelectedOption(option);
-
-      const sortedDoctors = [...doctors].sort((a, b) => {
-        if (option === "name") {
-          const nameA = `${a.firstName} ${a.lastName}`;
-          const nameB = `${b.firstName} ${b.lastName}`;
-          return newSortOrder === "asc" ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
-        } else if (option === "experience") {
-          return newSortOrder === "asc" ? a[option] - b[option] : b[option] - a[option];
-        }
-        return 0; // No sorting for other attributes
-      });
-
-      setFilteredDoctors(sortedDoctors);
-    } else if (option === "feePerCunsultation") {
-      if (option === selectedOption) {
-        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-      } else {
-        setSelectedOption(option);
-        setSortOrder("asc");
-      }
+      setSortOrder("asc");
     }
+
+    applyFilters();
   };
 
   useEffect(() => {
-    handleSearch();
-  }, [searchQuery, selectedOption, sortOrder]);
+    applyFilters();
+  }, [searchQuery, selectedOption, sortOrder, specializationQuery]);
 
   const getSortLabel = (option) => {
     if (option === selectedOption) {
@@ -109,15 +101,21 @@ function Home() {
     }
     return "";
   };
-
   return (
     <Layout>
       <div className="top-container">
-        <DoctorSearchBar
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          handleSearch={handleSearch}
-        />
+        <div className="search-bars-container">
+          <DoctorSearchBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            handleSearch={handleSearch}
+          />
+          <SpecializationSearchBar
+            specializationQuery={specializationQuery}
+            setSpecializationQuery={setSpecializationQuery}
+            handleSearch={handleSpecializationSearch}
+          />
+        </div>
         <div className="button-container">
           <button onClick={() => handleSort("name")} className="sort-button">
             Sort by Name {getSortLabel("name")}
