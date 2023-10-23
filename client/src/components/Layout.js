@@ -33,7 +33,7 @@ function Layout({ children }) {
   const doctorMenu = [
     {
       name: "Appointments",
-      path: "/doctor/p",
+      path: "/doctor/appointments",
       icon: "ri-file-list-line",
     },
     {
