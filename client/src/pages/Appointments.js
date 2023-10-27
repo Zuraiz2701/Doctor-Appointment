@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import Layout from "../components/Layout";
 import { showLoading, hideLoading } from "../redux/alertsSlice";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, Modal, Button } from "antd";
 import moment from "moment";
 import "./Appointments.css";
 import { useNavigate } from "react-router-dom";
@@ -11,30 +11,41 @@ import { useNavigate } from "react-router-dom";
 function Appointments() {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
+  const [prescriptionModalVisible, setPrescriptionModalVisible] = useState(
+    false
+  );
+  const [currentPrescription, setCurrentPrescription] = useState("");
   const dispatch = useDispatch();
+
   const getAppointmentsData = async () => {
     try {
       dispatch(showLoading());
-      const resposne = await axios.get("/api/user/get-appointments-by-user-id", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.get(
+        "/api/user/get-appointments-by-user-id",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       dispatch(hideLoading());
-      if (resposne.data.success) {
-        setAppointments(resposne.data.data);
+      if (response.data.success) {
+        setAppointments(response.data.data);
       }
     } catch (error) {
       dispatch(hideLoading());
     }
   };
 
-
   const handleVideoButtonClick = (isDoctor, id) => {
-    console.log("id", id);
     navigate(`/video/${id}?isDoctor=${isDoctor}`);
     window.location.reload();
-  }
+  };
+
+  const openPrescriptionModal = (prescription) => {
+    setCurrentPrescription(prescription);
+    setPrescriptionModalVisible(true);
+  };
 
   const columns = [
     {
@@ -54,9 +65,7 @@ function Appointments() {
       title: "Phone",
       dataIndex: "phoneNumber",
       render: (text, record) => (
-        <span>
-          {record.doctorInfo.phoneNumber}
-        </span>
+        <span>{record.doctorInfo.phoneNumber}</span>
       ),
     },
     {
@@ -64,7 +73,8 @@ function Appointments() {
       dataIndex: "createdAt",
       render: (text, record) => (
         <span>
-          {moment(record.date).format("DD-MM-YYYY")} {moment(record.time).format("HH:mm")}
+          {moment(record.date).format("DD-MM-YYYY")}{" "}
+          {moment(record.time).format("HH:mm")}
         </span>
       ),
     },
@@ -73,26 +83,65 @@ function Appointments() {
       dataIndex: "status",
     },
     {
-      title: "Video ID",
-      dataIndex: "videoId",
+      title: "Join Video",
+      dataIndex: "joinVideo",
       render: (text, record) => (
         <span>
-          {record.videoId !== "" && record.videoId !== "videoId will be available at appointment date and time when doctor starts the video call" ? (
-            record.isVideoEnded ? (
-              <span>Video Consultation completed</span>
-            ) : (
+          {record.videoId ? (
+            // Show "Join Video" button only when videoId is not null and isVideoEnded is false
+            record.status === "approved" && !record.isVideoEnded && (
               <button onClick={() => handleVideoButtonClick(false, record._id)}>
-                View Video
+                Join Video
               </button>
             )
-          ) : null}
+          ) : (
+            // Show message when videoId is null
+            <span>Join Video button will be available at the scheduled appointment time when the doctor starts the video call.</span>
+          )}
+          {record.isVideoEnded && (
+            // Show message when video consultation is completed
+            <span>Video Consultation completed</span>
+          )}
         </span>
       ),
     },
+
+    // Add a new column for Prescriptions
+    {
+      title: "Prescription",
+      dataIndex: "prescription",
+      render: (text, record) => (
+        <div>
+          {record.isVideoEnded ? (
+            // Show prescription if video is ended
+            record.prescription && (
+              <>
+                <button onClick={() => openPrescriptionModal(record.prescription)}>
+                  View Prescription
+                </button>
+                <Modal
+                  title="Prescription"
+                  visible={prescriptionModalVisible}
+                  onCancel={() => setPrescriptionModalVisible(false)}
+                  footer={null}
+                >
+                  <pre style={{ whiteSpace: "pre-wrap" }}>{currentPrescription}</pre>
+                </Modal>
+              </>
+            )
+          ) : (
+            // Show message if video is not ended
+            <span>Doctor will send prescription after video consultation</span>
+          )}
+        </div>
+      ),
+    },
   ];
+
   useEffect(() => {
     getAppointmentsData();
   }, []);
+
   return (
     <Layout>
       <h1 className="page-title">Appointments</h1>
@@ -101,16 +150,15 @@ function Appointments() {
         columns={columns}
         dataSource={appointments}
         style={{
-          border: '1px solid #e8e8e8',
-          borderRadius: '4px',
-          padding: '16px',
-          background: 'linear-gradient(#005555, #007777)',
-          color: '#linear-gradient(#005555, #007777)', // Set text color to white
+          border: "1px solid #e8e8e8",
+          borderRadius: "4px",
+          padding: "16px",
+          background: "linear-gradient(#005555, #007777)",
+          color: "#linear-gradient(#005555, #007777)", // Set text color to white
         }}
       />
-
     </Layout>
-  )
+  );
 }
 
 export default Appointments;

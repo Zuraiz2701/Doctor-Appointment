@@ -288,6 +288,7 @@ router.post('/store-prescription', authMiddleware, async (req, res) => {
   try {
     const { appointmentId, prescription } = req.body;
 
+
     const appointment = await Appointment.findByIdAndUpdate(
       appointmentId,
       { prescription },

@@ -180,7 +180,7 @@ function VideoConfrence() {
         },
       });
 
-      navigate("/appointments");
+      navigate("/");
       window.location.reload();
     } catch (error) {
       console.error("Error ending the video:", error);
@@ -207,13 +207,17 @@ function VideoConfrence() {
               </Button>
             ) :
               isDoctor !== "true" ? (
-                <IconButton
-                  color="primary"
-                  aria-label="call"
-                  onClick={() => callUser(appointment.videoId)}
-                >
-                  <PhoneIcon fontSize="large" />
-                </IconButton>
+
+                <>
+                  <h5>Join Video Conference</h5>
+                  <IconButton
+                    color="primary"
+                    aria-label="call"
+                    onClick={() => callUser(appointment.videoId)}
+                  >
+                    <PhoneIcon fontSize="large" />
+                  </IconButton>
+                </>
               ) : (
                 <p>Waiting for the patient to join</p>
 

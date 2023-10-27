@@ -4,20 +4,24 @@ import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, Input, Button, Modal } from "antd";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 
-
 function DoctorAppointments() {
-
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
+  const [prescriptionModalVisible, setPrescriptionModalVisible] = useState(
+    false
+  );
+  const [prescriptionInput, setPrescriptionInput] = useState("");
+  const [currentRecord, setCurrentRecord] = useState(null);
   const dispatch = useDispatch();
+
   const getAppointmentsData = async () => {
     try {
       dispatch(showLoading());
-      const resposne = await axios.get(
+      const response = await axios.get(
         "/api/doctor/get-appointments-by-doctor-id",
         {
           headers: {
@@ -26,8 +30,8 @@ function DoctorAppointments() {
         }
       );
       dispatch(hideLoading());
-      if (resposne.data.success) {
-        setAppointments(resposne.data.data);
+      if (response.data.success) {
+        setAppointments(response.data.data);
       }
     } catch (error) {
       dispatch(hideLoading());
@@ -37,7 +41,7 @@ function DoctorAppointments() {
   const changeAppointmentStatus = async (record, status) => {
     try {
       dispatch(showLoading());
-      const resposne = await axios.post(
+      const response = await axios.post(
         "/api/doctor/change-appointment-status",
         { appointmentId: record._id, status: status },
         {
@@ -47,8 +51,8 @@ function DoctorAppointments() {
         }
       );
       dispatch(hideLoading());
-      if (resposne.data.success) {
-        toast.success(resposne.data.message);
+      if (response.data.success) {
+        toast.success(response.data.message);
         getAppointmentsData();
       }
     } catch (error) {
@@ -57,14 +61,52 @@ function DoctorAppointments() {
     }
   };
 
+  const openPrescriptionModal = (record) => {
+    setCurrentRecord(record);
+    setPrescriptionInput(record.prescription || ""); // Set initial value
+    setPrescriptionModalVisible(true);
+  };
+
+  const handlePrescriptionChange = (event) => {
+    // Replace new lines with actual line breaks
+    const updatedPrescription = event.target.value.replace(/\n/g, '\n');
+    setPrescriptionInput(updatedPrescription);
+  };
+
+  const handlePrescriptionModalOk = async () => {
+    if (currentRecord) {
+      try {
+        dispatch(showLoading());
+        const response = await axios.post(
+          "/api/doctor/store-prescription",
+          {
+            appointmentId: currentRecord._id,
+            prescription: prescriptionInput,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        dispatch(hideLoading());
+        if (response.data.success) {
+          toast.success(response.data.message);
+          getAppointmentsData();
+        }
+      } catch (error) {
+        toast.error("Error storing prescription");
+        dispatch(hideLoading());
+      }
+    }
+    setPrescriptionModalVisible(false);
+  };
+
   const handleClick = (id, isDoctor) => {
-    //localStorage.clear();
-    //navigate(`/video`)
-    console.log("id", id);
-    //navigate(`/video/${id}`);
     navigate(`/video/${id}?isDoctor=${isDoctor}`);
     window.location.reload();
-  }
+  };
+
   const columns = [
     {
       title: "Id",
@@ -75,11 +117,11 @@ function DoctorAppointments() {
       dataIndex: "name",
       render: (text, record) => <span>{record.userInfo.name}</span>,
     },
-    {
-      title: "Phone",
-      dataIndex: "phoneNumber",
-      render: (text, record) => <span>{record.doctorInfo.phoneNumber}</span>,
-    },
+    // {
+    //   title: "Phone",
+    //   dataIndex: "phoneNumber",
+    //   render: (text, record) => <span>{record.doctorInfo.phoneNumber}</span>,
+    // },
     {
       title: "Date & Time",
       dataIndex: "createdAt",
@@ -123,13 +165,11 @@ function DoctorAppointments() {
       dataIndex: "videoConsult",
       render: (text, record) => {
         const appointmentDateTime = moment(record.date);
-        appointmentDateTime.set({ hour: moment(record.time).get('hour'), minute: moment(record.time).get('minute') });
+        appointmentDateTime.set({
+          hour: moment(record.time).get("hour"),
+          minute: moment(record.time).get("minute"),
+        });
         const currentDateTime = moment();
-
-        console.log("Record Date:", record.date);
-        console.log("Record Time:", record.time);
-        console.log("Formatted Appointment DateTime:", appointmentDateTime.format("DD-MM-YYYY HH:mm"));
-        console.log("Current DateTime:", currentDateTime.format("DD-MM-YYYY HH:mm"));
 
         if (record.isVideoEnded) {
           return <span>Video Consultation completed</span>;
@@ -138,7 +178,10 @@ function DoctorAppointments() {
           appointmentDateTime.isSameOrBefore(currentDateTime)
         ) {
           return (
-            <button className="anchor" onClick={() => handleClick(record._id, true)}>
+            <button
+              className="anchor"
+              onClick={() => handleClick(record._id, true)}
+            >
               Start Video Consult
             </button>
           );
@@ -146,15 +189,26 @@ function DoctorAppointments() {
           return <span>Video Consult not available</span>;
         }
       },
-
     },
-
-
-
-
+    {
+      title: "Prescription",
+      dataIndex: "prescription",
+      render: (text, record) => (
+        <div>
+          {record.isVideoEnded ? (
+            // Show "Add Prescription" button only if isVideoEnded is true
+            <Button onClick={() => openPrescriptionModal(record)}>
+              Add Prescription
+            </Button>
+          ) : (
+            <span>You can send prescription after Video consultation</span>
+          )}
+        </div>
+      ),
+    },
   ];
-  useEffect(() => {
 
+  useEffect(() => {
     getAppointmentsData();
   }, []);
 
@@ -166,13 +220,28 @@ function DoctorAppointments() {
         columns={columns}
         dataSource={appointments}
         style={{
-          border: '1px solid #e8e8e8',
-          borderRadius: '4px',
-          padding: '16px',
-          background: 'linear-gradient(#005555, #007777)',
-          color: '#linear-gradient(#005555, #007777)', // Set text color to white
+          border: "1px solid #e8e8e8",
+          borderRadius: "4px",
+          padding: "16px",
+          background: "linear-gradient(#005555, #007777)",
+          color: "#linear-gradient(#005555, #007777)", // Set text color to white
         }}
       />
+
+      {/* Prescription Modal */}
+      <Modal
+        title="Add Prescription"
+        visible={prescriptionModalVisible}
+        onOk={handlePrescriptionModalOk}
+        onCancel={() => setPrescriptionModalVisible(false)}
+      >
+        <Input.TextArea
+          placeholder="Enter prescription"
+          value={prescriptionInput}
+          onChange={handlePrescriptionChange}
+          autoSize={{ minRows: 4, maxRows: 8 }} // Auto adjust the height based on content
+        />
+      </Modal>
     </Layout>
   );
 }
