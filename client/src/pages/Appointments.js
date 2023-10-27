@@ -78,9 +78,13 @@ function Appointments() {
       render: (text, record) => (
         <span>
           {record.videoId !== "" && record.videoId !== "videoId will be available at appointment date and time when doctor starts the video call" ? (
-            <button onClick={() => handleVideoButtonClick(false, record._id)}>
-              View Video
-            </button>
+            record.isVideoEnded ? (
+              <span>Video Consultation completed</span>
+            ) : (
+              <button onClick={() => handleVideoButtonClick(false, record._id)}>
+                View Video
+              </button>
+            )
           ) : null}
         </span>
       ),

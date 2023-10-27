@@ -131,7 +131,9 @@ function DoctorAppointments() {
         console.log("Formatted Appointment DateTime:", appointmentDateTime.format("DD-MM-YYYY HH:mm"));
         console.log("Current DateTime:", currentDateTime.format("DD-MM-YYYY HH:mm"));
 
-        if (
+        if (record.isVideoEnded) {
+          return <span>Video Consultation completed</span>;
+        } else if (
           record.status === "approved" &&
           appointmentDateTime.isSameOrBefore(currentDateTime)
         ) {
@@ -144,7 +146,9 @@ function DoctorAppointments() {
           return <span>Video Consult not available</span>;
         }
       },
+
     },
+
 
 
 

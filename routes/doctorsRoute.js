@@ -43,24 +43,6 @@ router.post("/get-doctor-info-by-id", authMiddleware, async (req, res) => {
   }
 });
 
-// router.post("/update-doctor-profile", authMiddleware, async (req, res) => {
-//   try {
-//     const doctor = await Doctor.findOneAndUpdate(
-//       { userId: req.body.userId },
-//       req.body
-//     );
-//     res.status(200).send({
-//       success: true,
-//       message: "Doctor profile updated successfully",
-//       data: doctor,
-//     });
-//   } catch (error) {
-//     res
-//       .status(500)
-//       .send({ message: "Error getting doctor info", success: false, error });
-//   }
-// });
-
 router.post("/update-doctor-profile", authMiddleware, async (req, res) => {
   try {
     const file = req.files.photo;
@@ -244,5 +226,111 @@ router.post("/store-video-id", authMiddleware, async (req, res) => {
   }
 });
 
+// New route to set isVideoEnded to true
+router.post("/end-video", authMiddleware, async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+
+    // Find the appointment by ID and update isVideoEnded to true
+    const appointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { isVideoEnded: true },
+      { new: true }
+    );
+
+    if (!appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    // Fetch user information for sending notifications
+    const user = await User.findOne({ _id: appointment.userId });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Push a notification to the user
+    const message = `The video consultation with Dr. ${appointment.doctorInfo.firstName} ${appointment.doctorInfo.lastName} has ended. A prescription will be sent soon.`;
+    const notification = {
+      type: "video-ended",
+      message,
+      onClickPath: "/appointments",
+    };
+
+    // Push the notification to the user's unseen notifications
+    user.unseenNotifications.push(notification);
+
+    // Save the user with the new notification
+    await user.save();
+
+    // Send a push notification (you need to implement this function)
+    // sendNotification(user.deviceToken, message);
+
+    res.status(200).json({
+      message: "Video has ended for the appointment",
+      success: true,
+      appointment,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      message: "Error ending the video",
+      success: false,
+      error,
+    });
+  }
+});
+
+
+
+
+router.post('/store-prescription', authMiddleware, async (req, res) => {
+  try {
+    const { appointmentId, prescription } = req.body;
+
+    const appointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { prescription },
+      { new: true }
+    );
+
+    if (!appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    // Fetch user information for sending notifications
+    const user = await User.findOne({ _id: appointment.userId });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Send a notification to the user
+    const notification = {
+      type: 'prescription-sent',
+      message: 'Your prescription is ready. Click here to view.',
+      onClickPath: `/appointments/${appointmentId}`,
+    };
+
+    // Push the notification to the user's unseen notifications
+    user.unseenNotifications.push(notification);
+
+    // Save the user with the new notification
+    await user.save();
+
+    res.status(200).json({
+      message: 'Prescription stored successfully',
+      success: true,
+      appointment,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: 'Error storing prescription',
+      success: false,
+      error,
+    });
+  }
+});
 
 module.exports = router;
